@@ -8,7 +8,7 @@
 > 
 > - 个人学习 / 教育 / 非商业用途：允许免费使用
 > - 商业用途（包括但不限于商业产品、商业服务、销售、再许可）：**需书面授权**
-> - 联系邮箱：403938571@qq.com
+> - 联系邮箱：crist403938571@gmail.com
 > - 完整协议内容请查看 [LICENSE](./LICENSE)
 
 ## 项目结构
@@ -152,5 +152,5 @@ Custom License (Non-Commercial)
 
 Copyright (c) 2026 Crist. All rights reserved.
 
-个人学习 / 教育 / 非商业用途可免费使用；商业用途需联系 403938571@qq.com 获取书面授权。
+个人学习 / 教育 / 非商业用途可免费使用；商业用途需联系 crist403938571@gmail.com 获取书面授权。
 完整协议请查看 [LICENSE](./LICENSE)。

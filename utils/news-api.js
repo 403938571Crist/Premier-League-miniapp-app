@@ -1,6 +1,6 @@
 const { formatDate } = require('./util');
+const { API_BASE_URL } = require('./env-config');
 
-const DEFAULT_API_BASE_URL = 'http://localhost:8080/api';
 const FILTERED_SOURCE_TYPES = ['bilibili', 'douyin'];
 
 const SOURCE_META = {

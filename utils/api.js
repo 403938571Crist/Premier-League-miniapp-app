@@ -1,12 +1,11 @@
 const { ERROR_CODES, ERROR_MESSAGES } = require('./constants');
-
-const DEFAULT_API_BASE_URL = 'http://localhost:8080/api';
+const { API_BASE_URL } = require('./env-config');
 
 function getApiBaseUrl() {
   const app = getApp();
   return app?.globalData?.backendApiBaseUrl
     || app?.globalData?.apiBaseUrl
-    || DEFAULT_API_BASE_URL;
+    || API_BASE_URL;
 }
 
 function buildQueryString(params = {}) {

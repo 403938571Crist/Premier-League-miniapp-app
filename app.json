@@ -1,0 +1,58 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/standings/standings",
+    "pages/fixtures/fixtures",
+    "pages/news-detail/news-detail",
+    "pages/team-detail/team-detail",
+    "pages/player-detail/player-detail",
+    "pages/profile/profile"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#38003C",
+    "navigationBarTitleText": "英超资讯",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#F5F5F5",
+    "enablePullDownRefresh": false
+  },
+  "tabBar": {
+    "color": "#8E8E93",
+    "selectedColor": "#38003C",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "images/tabbar/home.png",
+        "selectedIconPath": "images/tabbar/home-active.png"
+      },
+      {
+        "pagePath": "pages/standings/standings",
+        "text": "积分榜",
+        "iconPath": "images/tabbar/standings.png",
+        "selectedIconPath": "images/tabbar/standings-active.png"
+      },
+      {
+        "pagePath": "pages/fixtures/fixtures",
+        "text": "赛程",
+        "iconPath": "images/tabbar/fixtures.png",
+        "selectedIconPath": "images/tabbar/fixtures-active.png"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的",
+        "iconPath": "images/tabbar/profile.png",
+        "selectedIconPath": "images/tabbar/profile-active.png"
+      }
+    ]
+  },
+  "networkTimeout": {
+    "request": 10000,
+    "downloadFile": 10000
+  },
+  "debug": false,
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

@@ -1,0 +1,22 @@
+<view class="player-item" bindtap="onTap">
+  <image class="player-avatar" src="{{photo}}" mode="aspectFill" lazy-load></image>
+  
+  <view class="player-info">
+    <text class="player-name">{{name}}</text>
+    <view class="player-detail">
+      <text class="position">{{position}}</text>
+      <text class="separator" wx:if="{{nationality}}">|</text>
+      <text class="nationality" wx:if="{{nationality}}">{{nationality}}</text>
+      <text class="separator" wx:if="{{age}}">|</text>
+      <text class="age" wx:if="{{age}}">{{age}}岁</text>
+    </view>
+  </view>
+  
+  <view class="player-number" wx:if="{{number}}">
+    <text class="number">{{number}}号</text>
+  </view>
+  
+  <view class="arrow">
+    <text class="arrow-icon">›</text>
+  </view>
+</view>

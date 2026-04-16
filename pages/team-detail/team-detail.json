@@ -1,0 +1,11 @@
+{
+  "usingComponents": {
+    "follow-btn": "../../components/follow-btn/follow-btn",
+    "player-item": "../../components/player-item/player-item",
+    "match-card": "../../components/match-card/match-card",
+    "loading-state": "../../components/loading-state/loading-state",
+    "error-state": "../../components/error-state/error-state"
+  },
+  "backgroundColor": "#F5F5F5",
+  "navigationBarTitleText": "球队详情"
+}

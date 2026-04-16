@@ -1,0 +1,68 @@
+.team-item {
+  display: flex;
+  align-items: center;
+  height: 100rpx;
+  padding: 0 24rpx;
+  background-color: #FFFFFF;
+  position: relative;
+}
+
+.team-item:active {
+  background-color: #F5F5F5;
+}
+
+.zone-indicator {
+  position: absolute;
+  left: 0;
+  top: 20rpx;
+  bottom: 20rpx;
+  width: 4rpx;
+  border-radius: 0 2rpx 2rpx 0;
+}
+
+.zone-indicator-placeholder {
+  width: 4rpx;
+}
+
+.position {
+  width: 60rpx;
+  text-align: center;
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333333;
+}
+
+.team-logo {
+  width: 60rpx;
+  height: 60rpx;
+  margin: 0 16rpx;
+}
+
+.team-info {
+  flex: 1;
+  min-width: 0;
+  margin-right: 16rpx;
+}
+
+.team-name {
+  font-size: 28rpx;
+  color: #333333;
+}
+
+.stats {
+  display: flex;
+  align-items: center;
+}
+
+.stat {
+  width: 70rpx;
+  text-align: center;
+  font-size: 24rpx;
+  color: #666666;
+}
+
+.stat.points {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #38003C;
+}

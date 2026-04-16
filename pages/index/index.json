@@ -1,0 +1,10 @@
+{
+  "usingComponents": {
+    "match-card": "../../components/match-card/match-card",
+    "empty-state": "../../components/empty-state/empty-state",
+    "loading-state": "../../components/loading-state/loading-state",
+    "error-state": "../../components/error-state/error-state"
+  },
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#F5F5F5"
+}

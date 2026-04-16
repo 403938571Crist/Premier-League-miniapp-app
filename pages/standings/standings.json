@@ -1,0 +1,11 @@
+{
+  "usingComponents": {
+    "team-item": "../../components/team-item/team-item",
+    "loading-state": "../../components/loading-state/loading-state",
+    "error-state": "../../components/error-state/error-state",
+    "empty-state": "../../components/empty-state/empty-state"
+  },
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#F5F5F5",
+  "navigationBarTitleText": "积分榜"
+}

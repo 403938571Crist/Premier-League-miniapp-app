@@ -1,0 +1,208 @@
+<view class="container">
+  <!-- 加载状态 -->
+  <loading-state wx:if="{{loading}}"></loading-state>
+
+  <!-- 错误状态 -->
+  <error-state 
+    wx:elif="{{error}}"
+    bind:retry="loadData">
+  </error-state>
+
+  <!-- 内容区域 -->
+  <block wx:else>
+    <!-- 球队头部信息 -->
+    <view class="team-header">
+      <image class="team-logo" src="{{team.logo}}" mode="aspectFit"></image>
+      <text class="team-name">{{team.name}}</text>
+      <text class="team-venue" wx:if="{{team.venue}}">{{team.venue}}</text>
+      
+      <follow-btn 
+        team-id="{{team.id}}"
+        team-info="{{team}}"
+        bind:change="onFollowChange">
+      </follow-btn>
+    </view>
+
+    <!-- Tab 切换 -->
+    <view class="tab-bar">
+      <view 
+        class="tab-item {{activeTab === 'overview' ? 'active' : ''}}"
+        bindtap="switchTab"
+        data-tab="overview">
+        概览
+      </view>
+      <view 
+        class="tab-item {{activeTab === 'squad' ? 'active' : ''}}"
+        bindtap="switchTab"
+        data-tab="squad">
+        阵容
+      </view>
+      <view 
+        class="tab-item {{activeTab === 'fixtures' ? 'active' : ''}}"
+        bindtap="switchTab"
+        data-tab="fixtures">
+        赛程
+      </view>
+    </view>
+
+    <!-- 概览 Tab -->
+    <view class="tab-content" wx:if="{{activeTab === 'overview'}}">
+      <!-- 近期战绩 -->
+      <view class="card" wx:if="{{recentMatches.length > 0}}">
+        <view class="card-title">
+          <image class="card-title-icon" src="/images/icons/chart.png" mode="aspectFit"></image>
+          <text>近期战绩（近5场）</text>
+        </view>
+        <view class="recent-matches">
+          <view 
+            class="match-result {{item.result}}"
+            wx:for="{{recentMatches}}"
+            wx:key="index">
+            <text class="result-text">{{item.resultText}}</text>
+            <text class="result-score">{{item.score}}</text>
+            <text class="result-opponent">{{item.opponent}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 球队统计 -->
+      <view class="card" wx:if="{{teamStats.position}}">
+        <view class="card-title">
+          <image class="card-title-icon" src="/images/icons/stats.png" mode="aspectFit"></image>
+          <text>球队统计</text>
+        </view>
+        <view class="stats-list">
+          <view class="stat-item">
+            <text class="stat-label">联赛排名</text>
+            <text class="stat-value">第 {{teamStats.position}} 名</text>
+          </view>
+          <view class="stat-item">
+            <text class="stat-label">积分</text>
+            <text class="stat-value">{{teamStats.points}} 分</text>
+          </view>
+          <view class="stat-item">
+            <text class="stat-label">已赛场次</text>
+            <text class="stat-value">{{teamStats.played}} 场</text>
+          </view>
+          <view class="stat-item">
+            <text class="stat-label">进球/失球</text>
+            <text class="stat-value">{{teamStats.goalsFor}} / {{teamStats.goalsAgainst}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 球队简介 -->
+      <view class="card" wx:if="{{team.address || team.founded}}">
+        <view class="card-title">
+          <image class="card-title-icon" src="/images/icons/info-card.png" mode="aspectFit"></image>
+          <text>球队信息</text>
+        </view>
+        <view class="info-list">
+          <view class="info-item" wx:if="{{team.founded}}">
+            <text class="info-label">成立年份</text>
+            <text class="info-value">{{team.founded}} 年</text>
+          </view>
+          <view class="info-item" wx:if="{{team.address}}">
+            <text class="info-label">俱乐部地址</text>
+            <text class="info-value">{{team.address}}</text>
+          </view>
+          <view class="info-item" wx:if="{{team.website}}">
+            <text class="info-label">官方网站</text>
+            <text class="info-value link">{{team.website}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 阵容 Tab -->
+    <view class="tab-content" wx:if="{{activeTab === 'squad'}}">
+      <!-- 门将 -->
+      <view class="squad-section" wx:if="{{squad.goalkeepers.length > 0}}">
+        <view class="squad-title">
+          <image class="squad-title-icon" src="/images/icons/goalkeeper.png" mode="aspectFit"></image>
+          <text>门将（{{squad.goalkeepers.length}}）</text>
+        </view>
+        <view class="squad-list">
+          <player-item 
+            wx:for="{{squad.goalkeepers}}"
+            wx:key="id"
+            player="{{item}}"
+            bind:tap="onPlayerTap">
+          </player-item>
+        </view>
+      </view>
+
+      <!-- 后卫 -->
+      <view class="squad-section" wx:if="{{squad.defenders.length > 0}}">
+        <view class="squad-title">
+          <image class="squad-title-icon" src="/images/icons/defender.png" mode="aspectFit"></image>
+          <text>后卫（{{squad.defenders.length}}）</text>
+        </view>
+        <view class="squad-list">
+          <player-item 
+            wx:for="{{squad.defenders}}"
+            wx:key="id"
+            player="{{item}}"
+            bind:tap="onPlayerTap">
+          </player-item>
+        </view>
+      </view>
+
+      <!-- 中场 -->
+      <view class="squad-section" wx:if="{{squad.midfielders.length > 0}}">
+        <view class="squad-title">
+          <image class="squad-title-icon" src="/images/icons/midfielder.png" mode="aspectFit"></image>
+          <text>中场（{{squad.midfielders.length}}）</text>
+        </view>
+        <view class="squad-list">
+          <player-item 
+            wx:for="{{squad.midfielders}}"
+            wx:key="id"
+            player="{{item}}"
+            bind:tap="onPlayerTap">
+          </player-item>
+        </view>
+      </view>
+
+      <!-- 前锋 -->
+      <view class="squad-section" wx:if="{{squad.forwards.length > 0}}">
+        <view class="squad-title">
+          <image class="squad-title-icon" src="/images/icons/forward.png" mode="aspectFit"></image>
+          <text>前锋（{{squad.forwards.length}}）</text>
+        </view>
+        <view class="squad-list">
+          <player-item 
+            wx:for="{{squad.forwards}}"
+            wx:key="id"
+            player="{{item}}"
+            bind:tap="onPlayerTap">
+          </player-item>
+        </view>
+      </view>
+
+      <!-- 空状态 -->
+      <view class="empty-squad" wx:if="{{!squad.goalkeepers.length && !squad.defenders.length}}">
+        <text>阵容数据更新中</text>
+      </view>
+    </view>
+
+    <!-- 赛程 Tab -->
+    <view class="tab-content" wx:if="{{activeTab === 'fixtures'}}">
+      <view class="fixtures-section">
+        <view class="section-title fixtures-title">
+          <image class="section-title-icon" src="/images/icons/calendar.png" mode="aspectFit"></image>
+          <text>近期赛程</text>
+        </view>
+        <match-card 
+          wx:for="{{teamFixtures}}"
+          wx:key="id"
+          match="{{item}}">
+        </match-card>
+      </view>
+      
+      <view class="empty-fixtures" wx:if="{{!teamFixtures.length}}">
+        <text>暂无赛程数据</text>
+      </view>
+    </view>
+  </block>
+</view>

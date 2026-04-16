@@ -1,0 +1,163 @@
+.container {
+  padding: 0 30rpx 30rpx;
+  box-sizing: border-box;
+}
+
+.tab-bar {
+  display: flex;
+  margin: 20rpx 0;
+  background-color: #ffffff;
+  border-radius: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 10rpx 24rpx rgba(17, 17, 19, 0.04);
+}
+
+.tab-item {
+  position: relative;
+  flex: 1;
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30rpx;
+  color: #8e8e93;
+  font-weight: 600;
+}
+
+.tab-item.active {
+  color: #38003c;
+  font-weight: 700;
+}
+
+.tab-item.active::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 10rpx;
+  transform: translateX(-50%);
+  width: 42rpx;
+  height: 4rpx;
+  border-radius: 999rpx;
+  background-color: #38003c;
+}
+
+.table-card {
+  overflow: hidden;
+  background-color: #ffffff;
+  border-radius: 16rpx;
+}
+
+.table-header {
+  display: flex;
+  align-items: center;
+  height: 84rpx;
+  padding: 0 24rpx;
+  border-bottom: 1rpx solid #ececf1;
+  font-size: 24rpx;
+  color: #b0b0b5;
+}
+
+.header-position {
+  width: 68rpx;
+  text-align: center;
+}
+
+.header-team {
+  flex: 1;
+  margin-left: 80rpx;
+}
+
+.header-stats {
+  display: flex;
+  align-items: center;
+}
+
+.header-stat {
+  width: 74rpx;
+  text-align: center;
+}
+
+.header-stat.points {
+  color: #38003c;
+  font-weight: 700;
+}
+
+.cache-tip,
+.fallback-tip {
+  margin: 16rpx 20rpx 0;
+  padding: 14rpx 18rpx;
+  border-radius: 12rpx;
+}
+
+.cache-tip {
+  background-color: rgba(255, 152, 0, 0.1);
+}
+
+.cache-tip text {
+  font-size: 22rpx;
+  color: #ff9800;
+}
+
+.fallback-tip {
+  background-color: rgba(56, 0, 60, 0.06);
+}
+
+.fallback-tip text {
+  font-size: 22rpx;
+  color: #6a556f;
+}
+
+.standings-list {
+  background-color: #ffffff;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 24rpx;
+  padding: 30rpx 0;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+}
+
+.legend-color {
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: 4rpx;
+  margin-right: 8rpx;
+}
+
+.legend-color.champion {
+  background-color: #ffd700;
+}
+
+.legend-color.champions-league {
+  background-color: #38003c;
+}
+
+.legend-color.europa-league {
+  background-color: #00ff85;
+}
+
+.legend-color.relegation {
+  background-color: #ff5252;
+}
+
+.legend-text {
+  font-size: 22rpx;
+  color: #666666;
+}
+
+.data-source {
+  text-align: center;
+  padding: 10rpx 0 40rpx;
+}
+
+.data-source text {
+  font-size: 22rpx;
+  color: #a1a1a8;
+}

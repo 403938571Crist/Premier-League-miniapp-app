@@ -1,0 +1,93 @@
+<view
+  class="container"
+  capture-bind:touchstart="handleTouchStart"
+  capture-bind:touchmove="handleTouchMove"
+  capture-bind:touchend="handleTouchEnd"
+  capture-bind:touchcancel="handleTouchCancel">
+  <view class="hero-shell">
+    <view class="hero {{heroTransitionClass}}">
+      <view class="hero-top-row">
+        <view class="hero-arrow" bindtap="prevDate" hover-class="hero-arrow-hover">
+          <image class="hero-arrow-icon hero-arrow-left" src="/images/icons/arrow-right.png" mode="aspectFit"></image>
+        </view>
+        <view class="hero-arrow" bindtap="nextDate" hover-class="hero-arrow-hover">
+          <image class="hero-arrow-icon" src="/images/icons/arrow-right.png" mode="aspectFit"></image>
+        </view>
+      </view>
+
+      <view class="hero-title-group">
+        <text class="hero-eyebrow">{{heroEyebrow}}</text>
+        <text class="hero-title">{{heroTitle}}</text>
+      </view>
+
+      <view class="hero-tabs">
+        <view class="hero-tab {{activeTab == 'ALL' ? 'active' : ''}}" bindtap="switchTab" data-tab="ALL">
+          全部比赛
+        </view>
+        <view class="hero-tab {{activeTab == 'LIVE' ? 'active' : ''}}" bindtap="switchTab" data-tab="LIVE">
+          进行中
+        </view>
+        <view class="hero-tab {{activeTab == 'RESULTS' ? 'active' : ''}}" bindtap="switchTab" data-tab="RESULTS">
+          已结束
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="filters-wrap {{heroTransitionClass}}">
+    <view class="filters-card">
+      <view class="filters-main" bindtap="showDatePicker">
+        <image class="filters-icon" src="/images/icons/calendar.png" mode="aspectFit"></image>
+        <view class="filters-texts">
+          <text class="filters-label">{{filterWeek}}</text>
+          <text class="filters-date">{{filterDate}}</text>
+        </view>
+      </view>
+
+      <view class="filters-actions">
+        <view class="filters-action" bindtap="showDatePicker">
+          <image class="filters-action-icon" src="/images/icons/calendar.png" mode="aspectFit"></image>
+        </view>
+        <view class="filters-action" bindtap="showStatusSheet">
+          <image class="filters-action-icon" src="/images/icons/list.png" mode="aspectFit"></image>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="content-shell {{contentTransitionClass}}">
+    <loading-state wx:if="{{loading && !matches.length}}"></loading-state>
+
+    <error-state wx:elif="{{error}}" bind:retry="loadData"></error-state>
+
+    <block wx:else>
+      <view class="meta-row">
+        <text class="matchday-text">{{currentMatchday}}</text>
+        <text class="cache-text" wx:if="{{isCached}}">{{cacheTime}}</text>
+      </view>
+
+      <view class="matches-list" wx:if="{{hasMatches}}">
+        <match-card
+          wx:for="{{matches}}"
+          wx:key="id"
+          match="{{item}}"
+          variant="fixtures"
+          bind:tap="onMatchTap">
+        </match-card>
+      </view>
+
+      <empty-state
+        wx:else
+        title="该日期无比赛"
+        description="请选择其他日期查看"
+        show-action="{{true}}"
+        action-text="切换日期"
+        bind:action="showDatePicker">
+      </empty-state>
+
+      <view class="load-more" wx:if="{{hasMatches && !loading}}">
+        <text>已经到底了</text>
+      </view>
+    </block>
+  </view>
+</view>

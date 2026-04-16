@@ -1,0 +1,7 @@
+{
+  "usingComponents": {
+    "empty-state": "../../components/empty-state/empty-state"
+  },
+  "navigationBarTitleText": "资讯详情",
+  "backgroundColor": "#F5F5F7"
+}

@@ -1,0 +1,7 @@
+{
+  "usingComponents": {
+    "empty-state": "../../components/empty-state/empty-state"
+  },
+  "backgroundColor": "#F5F5F5",
+  "navigationBarTitleText": "我的"
+}

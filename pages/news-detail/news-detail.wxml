@@ -1,0 +1,70 @@
+<loading-state wx:if="{{loading}}"></loading-state>
+
+<view class="container" wx:elif="{{!notFound && article}}">
+  <view class="hero hero-{{article.coverTheme}}">
+    <view class="hero-top">
+      <view class="hero-chip" style="background-color: {{article.coverAccent}};">
+        <text class="hero-chip-text">{{article.coverLabel}}</text>
+      </view>
+      <text class="hero-date">{{article.publishedAt}}</text>
+    </view>
+
+    <view class="hero-copy">
+      <text class="hero-source">{{sourceLabel}}</text>
+      <text class="hero-title">{{article.title}}</text>
+      <text class="hero-summary">{{article.summary}}</text>
+    </view>
+  </view>
+
+  <view class="meta-card">
+    <view class="meta-row">
+      <text class="meta-label">来源</text>
+      <text class="meta-value">{{article.source}}</text>
+    </view>
+    <view class="meta-row">
+      <text class="meta-label">类型</text>
+      <text class="meta-value">{{article.mediaType}}</text>
+    </view>
+    <view class="meta-row">
+      <text class="meta-label">作者</text>
+      <text class="meta-value">{{article.author}}</text>
+    </view>
+  </view>
+
+  <view class="article-card">
+    <view class="article-note">
+      <text>{{article.sourceNote}}</text>
+    </view>
+
+    <block wx:for="{{article.blocks}}" wx:key="index">
+      <view class="article-block" wx:if="{{item.type === 'paragraph'}}">
+        <text class="article-paragraph">{{item.text}}</text>
+      </view>
+
+      <view class="article-block quote-block" wx:elif="{{item.type === 'quote'}}">
+        <text class="article-quote">{{item.text}}</text>
+      </view>
+
+      <view class="article-block" wx:elif="{{item.type === 'bullet'}}">
+        <view class="bullet-item" wx:for="{{item.items}}" wx:key="index">
+          <view class="bullet-dot"></view>
+          <text class="bullet-text">{{item}}</text>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <view class="action-row">
+    <view class="action-btn" bindtap="onCopyLink">
+      <text>复制原文链接</text>
+    </view>
+  </view>
+</view>
+
+<view class="container" wx:else>
+  <empty-state
+    title="资讯不存在"
+    description="当前资讯详情未找到"
+    show-action="{{false}}">
+  </empty-state>
+</view>

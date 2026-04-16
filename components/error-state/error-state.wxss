@@ -1,0 +1,47 @@
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80rpx 60rpx;
+  text-align: center;
+}
+
+.error-icon {
+  font-size: 80rpx;
+  margin-bottom: 30rpx;
+}
+
+.error-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333333;
+  margin-bottom: 16rpx;
+}
+
+.error-desc {
+  font-size: 28rpx;
+  color: #666666;
+  margin-bottom: 40rpx;
+  line-height: 1.6;
+}
+
+.error-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 64rpx;
+  padding: 0 48rpx;
+  background-color: #38003C;
+  color: #FFFFFF;
+  font-size: 28rpx;
+  border-radius: 32rpx;
+}
+
+.error-action:active {
+  opacity: 0.8;
+}
+
+.retry-text {
+  color: #FFFFFF;
+}

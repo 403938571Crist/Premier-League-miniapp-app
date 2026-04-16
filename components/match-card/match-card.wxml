@@ -1,0 +1,161 @@
+<block wx:if="{{isHighlight}}">
+  <view class="match-card highlight" bindtap="onTap">
+    <view class="hero-top">
+      <view class="hero-round" wx:if="{{matchday}}">
+        <text class="hero-round-text">{{matchday}}</text>
+      </view>
+      <view class="hero-datetime">
+        <text class="hero-date">{{dateText}}</text>
+        <text class="hero-time">{{time}}</text>
+      </view>
+    </view>
+
+    <view class="hero-main">
+      <view class="hero-team">
+        <image class="hero-team-logo" src="{{homeTeam.logo}}" mode="aspectFit" lazy-load></image>
+        <text class="hero-team-name ellipsis-2">{{homeTeam.name}}</text>
+      </view>
+
+      <view class="hero-score-section">
+        <block wx:if="{{status === 'FINISHED'}}">
+          <text class="hero-score">{{homeScore}}</text>
+          <text class="hero-score-divider">:</text>
+          <text class="hero-score">{{awayScore}}</text>
+        </block>
+        <block wx:elif="{{isLive}}">
+          <text class="hero-score live">{{homeScore}}</text>
+          <text class="hero-score-divider live">:</text>
+          <text class="hero-score live">{{awayScore}}</text>
+        </block>
+        <block wx:else>
+          <text class="hero-score pending">-</text>
+          <text class="hero-score-divider pending">:</text>
+          <text class="hero-score pending">-</text>
+        </block>
+      </view>
+
+      <view class="hero-team">
+        <image class="hero-team-logo" src="{{awayTeam.logo}}" mode="aspectFit" lazy-load></image>
+        <text class="hero-team-name ellipsis-2">{{awayTeam.name}}</text>
+      </view>
+    </view>
+
+    <view class="hero-bottom">
+      <block wx:if="{{isLive}}">
+        <view class="hero-status-chip live-chip">
+          <text class="live-dot"></text>
+          <text class="hero-status-text">直播中 {{minute}}'</text>
+        </view>
+      </block>
+      <block wx:else>
+        <view class="hero-status-chip">
+          <text class="hero-status-text {{statusClass}}">{{statusText}}</text>
+        </view>
+      </block>
+      <text class="hero-competition" wx:if="{{competition}}">{{competition}}</text>
+    </view>
+  </view>
+</block>
+
+<block wx:elif="{{variant === 'fixtures'}}">
+  <view class="match-card fixtures {{isLive ? 'is-live' : ''}}" bindtap="onTap">
+    <view class="fixtures-top">
+      <text class="fixtures-meta">{{matchday}}</text>
+      <text class="fixtures-state {{statusClass}}">
+        <block wx:if="{{isLive}}">LIVE {{minute}}'</block>
+        <block wx:elif="{{status === 'FINISHED'}}">FINAL</block>
+        <block wx:else>{{time}}</block>
+      </text>
+    </view>
+
+    <view class="fixtures-main">
+      <view class="fixtures-team">
+        <view class="fixtures-logo-wrap">
+          <image class="fixtures-logo" src="{{homeTeam.logo}}" mode="aspectFit" lazy-load></image>
+        </view>
+        <text class="fixtures-team-name ellipsis-2">{{homeTeam.name}}</text>
+      </view>
+
+      <view class="fixtures-score">
+        <block wx:if="{{status === 'FINISHED' || isLive}}">
+          <text class="fixtures-score-value {{isLive ? 'live' : ''}}">{{homeScore}}</text>
+          <text class="fixtures-score-divider {{isLive ? 'live' : ''}}">-</text>
+          <text class="fixtures-score-value {{isLive ? 'live' : ''}}">{{awayScore}}</text>
+        </block>
+        <block wx:else>
+          <text class="fixtures-kickoff-time">{{time}}</text>
+        </block>
+      </view>
+
+      <view class="fixtures-team">
+        <view class="fixtures-logo-wrap">
+          <image class="fixtures-logo" src="{{awayTeam.logo}}" mode="aspectFit" lazy-load></image>
+        </view>
+        <text class="fixtures-team-name ellipsis-2">{{awayTeam.name}}</text>
+      </view>
+    </view>
+
+    <view class="fixtures-bottom">
+      <view class="fixtures-bottom-left">
+        <text class="fixtures-status-dot" wx:if="{{isLive}}"></text>
+        <text class="fixtures-bottom-status {{statusClass}}">{{statusText}}</text>
+      </view>
+      <text class="fixtures-detail-link">MATCH DETAILS</text>
+    </view>
+  </view>
+</block>
+
+<block wx:else>
+  <view class="match-card" bindtap="onTap">
+    <view class="match-header">
+      <view class="match-datetime">
+        <text class="match-date">{{dateText}}</text>
+        <text class="match-time">{{time}}</text>
+      </view>
+      <text class="match-day">{{matchday}}</text>
+    </view>
+
+    <view class="match-content">
+      <view class="team home-team">
+        <image class="team-logo" src="{{homeTeam.logo}}" mode="aspectFit" lazy-load></image>
+        <text class="team-name ellipsis-2">{{homeTeam.name}}</text>
+      </view>
+
+      <view class="score-section">
+        <block wx:if="{{status === 'FINISHED'}}">
+          <text class="score">{{homeScore}}</text>
+          <text class="score-divider">:</text>
+          <text class="score">{{awayScore}}</text>
+        </block>
+        <block wx:elif="{{isLive}}">
+          <text class="score live">{{homeScore}}</text>
+          <text class="score-divider live">:</text>
+          <text class="score live">{{awayScore}}</text>
+        </block>
+        <block wx:else>
+          <text class="score pending">-</text>
+          <text class="score-divider pending">:</text>
+          <text class="score pending">-</text>
+        </block>
+      </view>
+
+      <view class="team away-team">
+        <image class="team-logo" src="{{awayTeam.logo}}" mode="aspectFit" lazy-load></image>
+        <text class="team-name ellipsis-2">{{awayTeam.name}}</text>
+      </view>
+    </view>
+
+    <view class="match-footer">
+      <block wx:if="{{isLive}}">
+        <view class="status-live">
+          <text class="live-dot"></text>
+          <text class="live-text">直播中 {{minute}}'</text>
+        </view>
+      </block>
+      <block wx:else>
+        <text class="status {{statusClass}}">{{statusText}}</text>
+      </block>
+      <text class="competition" wx:if="{{competition}}">{{competition}}</text>
+    </view>
+  </view>
+</block>

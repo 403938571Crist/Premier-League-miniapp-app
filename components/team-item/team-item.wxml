@@ -1,0 +1,18 @@
+<view class="team-item" bindtap="onTap">
+  <view class="zone-indicator" style="background-color: {{zoneColor}}" wx:if="{{zoneColor}}"></view>
+  <view class="zone-indicator-placeholder" wx:else></view>
+  
+  <view class="position">{{position}}</view>
+  
+  <image class="team-logo" src="{{logo}}" mode="aspectFit" lazy-load></image>
+  
+  <view class="team-info">
+    <text class="team-name ellipsis">{{name}}</text>
+  </view>
+  
+  <view class="stats">
+    <view class="stat">{{played}}</view>
+    <view class="stat">{{goalDiff > 0 ? '+' + goalDiff : goalDiff}}</view>
+    <view class="stat points">{{points}}</view>
+  </view>
+</view>

@@ -1,0 +1,104 @@
+<view class="container">
+  <!-- 加载状态 -->
+  <loading-state wx:if="{{loading}}"></loading-state>
+
+  <!-- 错误状态 -->
+  <error-state 
+    wx:elif="{{error}}"
+    bind:retry="loadData">
+  </error-state>
+
+  <!-- 内容区域 -->
+  <block wx:else>
+    <!-- 球员头部信息 -->
+    <view class="player-header">
+      <image class="player-photo" src="{{player.photo}}" mode="aspectFill"></image>
+      <text class="player-name">{{player.name}}</text>
+      <view class="player-subtitle">
+        <text class="player-position">{{player.position}}</text>
+        <text class="separator" wx:if="{{player.nationality}}">|</text>
+        <text class="player-nationality" wx:if="{{player.nationality}}">{{player.nationality}}</text>
+      </view>
+      <view class="player-team" bindtap="goToTeam" wx:if="{{player.currentTeam}}">
+        <text>{{player.currentTeam.name}}</text>
+      </view>
+    </view>
+
+    <!-- 基本信息 -->
+    <view class="card">
+      <view class="card-title">
+        <image class="card-title-icon" src="/images/icons/info-card.png" mode="aspectFit"></image>
+        <text>基本信息</text>
+      </view>
+      <view class="info-list">
+        <view class="info-item" wx:if="{{player.dateOfBirth}}">
+          <text class="info-label">出生日期</text>
+          <text class="info-value">{{player.dateOfBirth}}</text>
+        </view>
+        <view class="info-item" wx:if="{{player.age}}">
+          <text class="info-label">年龄</text>
+          <text class="info-value">{{player.age}} 岁</text>
+        </view>
+        <view class="info-item" wx:if="{{player.height}}">
+          <text class="info-label">身高</text>
+          <text class="info-value">{{player.height}} cm</text>
+        </view>
+        <view class="info-item" wx:if="{{player.shirtNumber}}">
+          <text class="info-label">球衣号码</text>
+          <text class="info-value">{{player.shirtNumber}} 号</text>
+        </view>
+        <view class="info-item" wx:if="{{player.nationality}}">
+          <text class="info-label">国籍</text>
+          <text class="info-value">{{player.nationality}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 赛季数据 -->
+    <view class="card" wx:if="{{playerStats.appearances > 0}}">
+      <view class="card-title">
+        <image class="card-title-icon" src="/images/icons/chart.png" mode="aspectFit"></image>
+        <text>本赛季数据</text>
+      </view>
+      
+      <!-- 核心数据 -->
+      <view class="core-stats">
+        <view class="core-stat">
+          <text class="core-value">{{playerStats.appearances}}</text>
+          <text class="core-label">出场</text>
+        </view>
+        <view class="core-stat">
+          <text class="core-value">{{playerStats.goals}}</text>
+          <text class="core-label">进球</text>
+        </view>
+        <view class="core-stat">
+          <text class="core-value">{{playerStats.assists}}</text>
+          <text class="core-label">助攻</text>
+        </view>
+      </view>
+
+      <!-- 详细数据 -->
+      <view class="stats-divider"></view>
+      <view class="info-list">
+        <view class="info-item">
+          <text class="info-label">场均进球</text>
+          <text class="info-value">{{playerStats.goalsPerMatch}}</text>
+        </view>
+        <view class="info-item" wx:if="{{playerStats.yellowCards !== undefined}}">
+          <text class="info-label">黄牌</text>
+          <text class="info-value">{{playerStats.yellowCards}}</text>
+        </view>
+        <view class="info-item" wx:if="{{playerStats.redCards !== undefined}}">
+          <text class="info-label">红牌</text>
+          <text class="info-value">{{playerStats.redCards}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 数据说明 -->
+    <view class="data-note">
+      <image class="data-note-icon" src="/images/icons/warning.png" mode="aspectFit"></image>
+      <text>数据由后端 /api 聚合返回，可能存在短暂缓存延迟</text>
+    </view>
+  </block>
+</view>

@@ -28,6 +28,24 @@ const SOURCE_META = {
     coverTheme: 'x',
     coverAccent: '#FFFFFF'
   },
+  sky: {
+    label: 'Sky Sports',
+    coverLabel: '天空体育',
+    coverTheme: 'sky',
+    coverAccent: '#0099CC'
+  },
+  guardian: {
+    label: 'The Guardian',
+    coverLabel: '卫报深度',
+    coverTheme: 'guardian',
+    coverAccent: '#052962'
+  },
+  reddit: {
+    label: 'Reddit 社区',
+    coverLabel: '球迷热议',
+    coverTheme: 'reddit',
+    coverAccent: '#FF4500'
+  },
   media: {
     label: '媒体报道',
     coverLabel: '媒体报道',

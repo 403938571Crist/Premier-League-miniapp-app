@@ -2,6 +2,11 @@ App({
   globalData: {
     userInfo: null,
     followedTeams: [],
+    // ============================================
+    // 部署配置：后端 API 基地址
+    // 本地开发：'http://localhost:8080/api'
+    // 微信云托管生产环境：'https://你的云托管域名/api'
+    // ============================================
     apiBaseUrl: 'http://localhost:8080/api',
     backendApiBaseUrl: 'http://localhost:8080/api',
     newsApiBaseUrl: 'http://localhost:8080/api',

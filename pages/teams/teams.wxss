@@ -1,0 +1,79 @@
+.container {
+  background: #F5F5F5;
+  min-height: 100vh;
+  padding: 12rpx 0;
+}
+
+.team-list {
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  margin: 0 24rpx;
+  overflow: hidden;
+}
+
+.team-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 28rpx;
+  border-bottom: 1rpx solid #F0F0F0;
+  gap: 20rpx;
+}
+
+.team-item:last-child {
+  border-bottom: none;
+}
+
+.team-rank {
+  width: 48rpx;
+  text-align: center;
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #38003C;
+  flex-shrink: 0;
+}
+
+.team-rank-empty {
+  color: #AAAAAA;
+  font-weight: 400;
+}
+
+.team-crest {
+  width: 60rpx;
+  height: 60rpx;
+  flex-shrink: 0;
+}
+
+.team-name {
+  flex: 1;
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #1A1A1A;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.team-points {
+  display: flex;
+  align-items: baseline;
+  gap: 4rpx;
+  flex-shrink: 0;
+}
+
+.points-value {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #38003C;
+}
+
+.points-label {
+  font-size: 22rpx;
+  color: #888888;
+}
+
+.arrow-icon {
+  width: 28rpx;
+  height: 28rpx;
+  opacity: 0.3;
+  flex-shrink: 0;
+}

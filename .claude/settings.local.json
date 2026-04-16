@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -i \".java$\")",
+      "Bash(mvn spring-boot:run -Dspring-boot.run.jvmArguments=\"-Dserver.port=8080\")",
+      "Bash(echo \"PID: $!\")",
+      "Bash(net start:*)",
+      "Bash(sc query:*)",
+      "Bash(sc queryex:*)",
+      "Bash(mysql -u root -e \"SELECT 1\")",
+      "Bash(echo \"exit:$?\")",
+      "Bash(where mysql:*)",
+      "Bash(where mysqld:*)",
+      "Bash(mkdir -p \"C:/Users/Crist/tools/mysql-run\")",
+      "Bash(\"C:/Users/Crist/tools/mysql-8.0.45-winx64/bin/mysqld.exe\" --defaults-file=\"C:/Users/Crist/tools/mysql-8.0.45-winx64/my.ini\")",
+      "Bash(echo \"mysqld started, PID=$!\")",
+      "Bash(mysql -u root --socket=\"\" -h 127.0.0.1 -P 3306 -e \"SHOW DATABASES;\")",
+      "Bash(mysql -u root -h 127.0.0.1 -P 3306 --password=\"\" -e \"SHOW DATABASES;\")",
+      "Bash(mysql -u root -h 127.0.0.1 -P 3306 -e \"SHOW DATABASES;\")",
+      "Bash(mysql -u root -h 127.0.0.1 -P 3306 -p'' -e \"SHOW DATABASES;\")",
+      "Bash(mysql -u root -h 127.0.0.1 -P 3306 -proot -e \"SHOW DATABASES;\")",
+      "Bash(mysql -u root -h 127.0.0.1 -P 3306 -p123456 -e \"SHOW DATABASES;\")",
+      "Bash(mysql -u root -h 127.0.0.1 -P 3306 --connect-expired-password -e \"FLUSH PRIVILEGES; ALTER USER 'root'@'localhost' IDENTIFIED BY ''; FLUSH PRIVILEGES;\")",
+      "Bash(mysql -u root --skip-password -h 127.0.0.1 -P 3306 -e \"SHOW DATABASES;\")",
+      "Bash(mysql -u root -h 127.0.0.1 -P 3306 --connect-expired-password)",
+      "Bash(tasklist)",
+      "Bash(taskkill /F /IM mysqld.exe)",
+      "Bash(\"C:/Users/Crist/tools/mysql-8.0.45-winx64/bin/mysqld.exe\" --defaults-file=\"C:/Users/Crist/tools/mysql-8.0.45-winx64/my.ini\" --skip-grant-tables)",
+      "Bash(echo \"restarted PID=$!\")",
+      "Bash(taskkill //F //IM mysqld.exe)",
+      "Bash(taskkill //F //PID 10164)",
+      "Bash(C:/Users/Crist/tools/mysql-8.0.45-winx64/bin/mysqld.exe --defaults-file=C:/Users/Crist/tools/mysql-8.0.45-winx64/my.ini --skip-grant-tables --port=3306)",
+      "Bash(echo \"PID=$!\")",
+      "Bash(cat \"G:/Premier-League-miniapp-server/scripts/\"*)",
+      "Bash(C:/Users/Crist/tools/mysql-8.0.45-winx64/bin/mysqld.exe --defaults-file=C:/Users/Crist/tools/mysql-8.0.45-winx64/my.ini --skip-grant-tables --enable-named-pipe)",
+      "Bash(mysql -u root --protocol=pipe -e \"FLUSH PRIVILEGES; ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY ''; FLUSH PRIVILEGES;\")",
+      "Bash(\"C:/Users/Crist/tools/mysql-8.0.45-winx64/bin/mysql.exe\" -u root --protocol=pipe --pipe)"
+    ]
+  }
+}

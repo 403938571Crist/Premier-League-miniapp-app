@@ -3,10 +3,15 @@ const { showConfirm, showSuccess, showError } = require('../../utils/util');
 Page({
   data: {
     followedTeams: [],
-    cacheSize: '0KB'
+    cacheSize: '0KB',
+    userInfo: {
+      nickName: '',
+      avatarUrl: ''
+    }
   },
 
   onLoad() {
+    this.loadUserInfo();
     this.loadFollowedTeams();
     this.calculateCacheSize();
   },
@@ -14,6 +19,30 @@ Page({
   onShow() {
     this.loadFollowedTeams();
   },
+
+  loadUserInfo() {
+    try {
+      const stored = wx.getStorageSync('userInfo');
+      if (stored) {
+        this.setData({ userInfo: stored });
+      }
+    } catch (e) {
+      console.error('读取用户信息失败:', e);
+    }
+  },
+
+  onChooseAvatar(e) {
+    const avatarUrl = e.detail.avatarUrl;
+    const userInfo = { ...this.data.userInfo, avatarUrl };
+    this.setData({ userInfo });
+    try {
+      wx.setStorageSync('userInfo', userInfo);
+    } catch (e) {
+      console.error('保存用户头像失败:', e);
+    }
+  },
+
+  onGetUserInfo() {},
 
   loadFollowedTeams() {
     const app = getApp();

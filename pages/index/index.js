@@ -1,7 +1,7 @@
 const { getFixtures } = require('../../utils/api');
 const { formatDate } = require('../../utils/util');
-const { getNewsList } = require('../../utils/news-api');
-const socialItems = require('../../utils/social-data');
+const { getNewsList, getPlayerSocial } = require('../../utils/news-api');
+const staticSocialItems = require('../../utils/social-data');
 
 const SHOW_REFRESH_INTERVAL = 2 * 60 * 1000;
 
@@ -49,7 +49,7 @@ Page({
   async loadData(useCache = true) {
     this.setData({ loading: true, error: null });
 
-    const [fixturesResult, newsResult] = await Promise.allSettled([
+    const [fixturesResult, newsResult, socialResult] = await Promise.allSettled([
       getFixtures(
         {
           dateFrom: this.getTodayDate(),
@@ -63,11 +63,13 @@ Page({
           pageSize: 6
         },
         useCache
-      )
+      ),
+      getPlayerSocial()
     ]);
 
     const fixturesData = fixturesResult.status === 'fulfilled' ? fixturesResult.value : null;
     const newsData = newsResult.status === 'fulfilled' ? newsResult.value : null;
+    const rawSocial = socialResult.status === 'fulfilled' ? socialResult.value : null;
 
     if (!fixturesData && !newsData) {
       const error = fixturesResult.reason || newsResult.reason || new Error('Load failed');
@@ -94,10 +96,27 @@ Page({
       loading: false,
       featuredMatches: this.selectFeaturedMatches(fixturesData?.matches || []),
       newsItems: newsData?.list || [],
-      socialItems,
+      socialItems: this.normalizeSocialItems(rawSocial),
       lastLoadedAt: Date.now(),
       ...this.getCacheInfo(fixturesData, newsData)
     });
+  },
+
+  normalizeSocialItems(apiData) {
+    if (!Array.isArray(apiData) || !apiData.length) {
+      return staticSocialItems;
+    }
+
+    return apiData.map((item) => ({
+      id: item.id,
+      playerName: item.playerName || '',
+      team: item.teamName || '',
+      handle: item.handle || '',
+      platform: item.platform || '',
+      summary: item.summary || '',
+      url: item.profileUrl || '',
+      note: item.summary || ''
+    }));
   },
 
   getCacheInfo(fixturesResult, newsResult) {
@@ -138,9 +157,8 @@ Page({
   },
 
   onSearchTap() {
-    wx.showToast({
-      title: '搜索功能开发中',
-      icon: 'none'
+    wx.navigateTo({
+      url: '/pages/search/search'
     });
   },
 
@@ -200,9 +218,8 @@ Page({
   },
 
   goToTeams() {
-    wx.showToast({
-      title: '球队列表功能开发中',
-      icon: 'none'
+    wx.navigateTo({
+      url: '/pages/teams/teams'
     });
   }
 });

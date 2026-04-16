@@ -1,12 +1,30 @@
 <view class="container">
   <!-- 用户信息头部 -->
   <view class="user-header">
-    <view class="user-avatar">
-      <open-data type="userAvatarUrl" default-avatar="/images/default/avatar.png"></open-data>
+    <view class="user-avatar-wrap" bindtap="onGetUserInfo">
+      <image
+        wx:if="{{userInfo.avatarUrl}}"
+        class="user-avatar"
+        src="{{userInfo.avatarUrl}}"
+        mode="aspectFill">
+      </image>
+      <image
+        wx:else
+        class="user-avatar"
+        src="/images/default/avatar.png"
+        mode="aspectFill">
+      </image>
     </view>
-    <view class="user-name">
-      <open-data type="userNickName" default-text="微信用户"></open-data>
+    <view class="user-name-wrap">
+      <text class="user-name">{{userInfo.nickName || '点击登录'}}</text>
     </view>
+    <button
+      wx:if="{{!userInfo.nickName}}"
+      class="login-btn"
+      open-type="chooseAvatar"
+      bindchooseavatar="onChooseAvatar">
+      获取头像
+    </button>
   </view>
 
   <!-- 我的关注 -->

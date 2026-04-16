@@ -1,0 +1,42 @@
+<view class="container">
+  <loading-state wx:if="{{loading}}"></loading-state>
+
+  <error-state
+    wx:elif="{{error}}"
+    title="{{error.title}}"
+    description="{{error.description}}"
+    bind:retry="loadData">
+  </error-state>
+
+  <block wx:else>
+    <view class="team-list">
+      <view
+        class="team-item"
+        wx:for="{{teams}}"
+        wx:key="id"
+        bindtap="onTeamTap"
+        data-id="{{item.id}}"
+        data-name="{{item.name}}">
+        <view class="team-rank" wx:if="{{item.position}}">
+          <text>{{item.position}}</text>
+        </view>
+        <view class="team-rank team-rank-empty" wx:else>
+          <text>-</text>
+        </view>
+        <image class="team-crest" src="{{item.crest}}" mode="aspectFit"></image>
+        <text class="team-name">{{item.name}}</text>
+        <view class="team-points" wx:if="{{item.points != null}}">
+          <text class="points-value">{{item.points}}</text>
+          <text class="points-label">分</text>
+        </view>
+        <image class="arrow-icon" src="/images/icons/arrow-right.png" mode="aspectFit"></image>
+      </view>
+    </view>
+
+    <empty-state
+      wx:if="{{!teams.length}}"
+      title="暂无球队数据"
+      description="稍后再试">
+    </empty-state>
+  </block>
+</view>

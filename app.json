@@ -6,6 +6,8 @@
     "pages/news-detail/news-detail",
     "pages/team-detail/team-detail",
     "pages/player-detail/player-detail",
+    "pages/teams/teams",
+    "pages/search/search",
     "pages/profile/profile"
   ],
   "window": {

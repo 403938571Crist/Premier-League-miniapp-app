@@ -1,5 +1,5 @@
 const { getPlayerDetail, getPlayerMatches, getTeamDetail } = require('../../utils/api');
-const { getPlayerPosition, calculateAge, getTeamName } = require('../../utils/util');
+const { calculateAge, getTeamName } = require('../../utils/util');
 
 Page({
   data: {
@@ -52,9 +52,9 @@ Page({
         player: {
           id: playerData.id,
           name: playerData.name,
-          photo: playerData.photo || '/images/default/player.png',
-          position: getPlayerPosition(playerData.position) || '未知',
-          nationality: playerData.nationality,
+          photo: playerData.photo || playerData.photoUrl || '/images/default/player.png',
+          position: playerData.positionLabel || playerData.chinesePosition || playerData.position || '未知',
+          nationality: playerData.nationalityLabel || playerData.chineseNationality || playerData.nationality || '',
           dateOfBirth: playerData.dateOfBirth,
           age: playerData.age || calculateAge(playerData.dateOfBirth),
           height: playerData.height,

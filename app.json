@@ -8,7 +8,8 @@
     "pages/player-detail/player-detail",
     "pages/teams/teams",
     "pages/search/search",
-    "pages/profile/profile"
+    "pages/profile/profile",
+    "pages/webview/webview"
   ],
   "window": {
     "navigationBarBackgroundColor": "#38003C",

@@ -51,6 +51,7 @@ const TEAM_SHORT_NAMES = {
 
 // 比赛状态
 const MATCH_STATUS = {
+  NOT_STARTED: 'NOT_STARTED',
   SCHEDULED: 'SCHEDULED',
   TIMED: 'TIMED',
   LIVE: 'LIVE',
@@ -65,6 +66,7 @@ const MATCH_STATUS = {
 
 // 比赛状态中文映射
 const MATCH_STATUS_TEXT = {
+  'NOT_STARTED': '未开始',
   'SCHEDULED': '未开始',
   'TIMED': '未开始',
   'LIVE': '直播中',
@@ -79,6 +81,7 @@ const MATCH_STATUS_TEXT = {
 
 // 比赛状态样式
 const MATCH_STATUS_STYLE = {
+  'NOT_STARTED': 'status-pending',
   'SCHEDULED': 'status-pending',
   'TIMED': 'status-pending',
   'LIVE': 'status-live',

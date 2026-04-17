@@ -1,69 +1,96 @@
 <view class="container">
   <view class="tab-bar">
     <view
-      class="tab-item {{activeTab === 'TOTAL' ? 'active' : ''}}"
+      wx:for="{{tabs}}"
+      wx:key="key"
+      class="tab-item {{activeTab === item.key ? 'active' : ''}}"
       bindtap="switchTab"
-      data-type="TOTAL">
-      总榜
-    </view>
-    <view
-      class="tab-item {{activeTab === 'HOME' ? 'active' : ''}}"
-      bindtap="switchTab"
-      data-type="HOME">
-      主场
-    </view>
-    <view
-      class="tab-item {{activeTab === 'AWAY' ? 'active' : ''}}"
-      bindtap="switchTab"
-      data-type="AWAY">
-      客场
+      data-type="{{item.key}}">
+      {{item.label}}
     </view>
   </view>
 
-  <loading-state wx:if="{{loading && !standings.length}}"></loading-state>
+  <view class="hero-card">
+    <text class="hero-title">{{activeTabMeta.title}}</text>
+    <text class="hero-description">{{activeTabMeta.description}}</text>
+  </view>
 
-  <error-state wx:elif="{{error}}" bind:retry="loadData"></error-state>
+  <loading-state wx:if="{{loading && activeTab === 'TOTAL' && !standings.length}}"></loading-state>
+
+  <error-state wx:elif="{{error && activeTab === 'TOTAL'}}" bind:retry="loadData"></error-state>
 
   <block wx:else>
-    <view class="table-card">
-      <view class="table-header">
-        <view class="header-position">排名</view>
-        <view class="header-team">球队</view>
-        <view class="header-stats">
-          <view class="header-stat">赛</view>
-          <view class="header-stat">净</view>
-          <view class="header-stat points">分</view>
+    <swiper
+      class="rank-swiper"
+      current="{{currentTabIndex}}"
+      duration="280"
+      previous-margin="0rpx"
+      next-margin="0rpx"
+      bindchange="onSwiperChange">
+      <swiper-item>
+        <view class="swiper-pane">
+          <view class="table-card">
+            <view class="table-header">
+              <view class="header-position">排名</view>
+              <view class="header-team">球队</view>
+              <view class="header-stats">
+                <view class="header-stat">赛</view>
+                <view class="header-stat">净</view>
+                <view class="header-stat points">分</view>
+              </view>
+            </view>
+
+            <view class="cache-tip" wx:if="{{isCached}}">
+              <text>数据来自缓存 · {{cacheTime}}</text>
+            </view>
+
+            <view class="standings-list" wx:if="{{standings.length > 0}}">
+              <team-item
+                wx:for="{{standings}}"
+                wx:key="position"
+                team="{{item}}"
+                bind:tap="onTeamTap">
+              </team-item>
+            </view>
+
+            <empty-state
+              wx:else
+              title="暂无总榜数据"
+              description="稍后再试或下拉刷新"
+              show-action="{{true}}"
+              action-text="重新加载"
+              bind:action="loadData">
+            </empty-state>
+          </view>
         </view>
-      </view>
+      </swiper-item>
 
-      <view class="cache-tip" wx:if="{{isCached}}">
-        <text>数据来自缓存 · {{cacheTime}}</text>
-      </view>
+      <swiper-item>
+        <view class="swiper-pane">
+          <view class="placeholder-card">
+            <view class="placeholder-badge">
+              <text>{{tabs[1].label}}</text>
+            </view>
+            <text class="placeholder-title">{{tabs[1].emptyTitle}}</text>
+            <text class="placeholder-description">{{tabs[1].emptyDescription}}</text>
+          </view>
+        </view>
+      </swiper-item>
 
-      <view class="fallback-tip" wx:if="{{isFallbackTab}}">
-        <text>当前仅展示总榜数据，主客场明细暂不可用</text>
-      </view>
+      <swiper-item>
+        <view class="swiper-pane">
+          <view class="placeholder-card">
+            <view class="placeholder-badge">
+              <text>{{tabs[2].label}}</text>
+            </view>
+            <text class="placeholder-title">{{tabs[2].emptyTitle}}</text>
+            <text class="placeholder-description">{{tabs[2].emptyDescription}}</text>
+          </view>
+        </view>
+      </swiper-item>
+    </swiper>
 
-      <view class="standings-list" wx:if="{{standings.length > 0}}">
-        <team-item
-          wx:for="{{standings}}"
-          wx:key="position"
-          team="{{item}}"
-          bind:tap="onTeamTap">
-        </team-item>
-      </view>
-
-      <empty-state
-        wx:else
-        title="暂无积分榜数据"
-        description="稍后再试或下拉刷新"
-        show-action="{{true}}"
-        action-text="重新加载"
-        bind:action="loadData">
-      </empty-state>
-    </view>
-
-    <view class="legend">
+    <view class="legend" wx:if="{{activeTab === 'TOTAL'}}">
       <view class="legend-item">
         <view class="legend-color champion"></view>
         <text class="legend-text">冠军</text>
@@ -74,7 +101,7 @@
       </view>
       <view class="legend-item">
         <view class="legend-color europa-league"></view>
-        <text class="legend-text">欧联区</text>
+        <text class="legend-text">欧战区</text>
       </view>
       <view class="legend-item">
         <view class="legend-color relegation"></view>

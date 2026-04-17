@@ -1,11 +1,6 @@
-<view
-  class="container"
-  capture-bind:touchstart="handleTouchStart"
-  capture-bind:touchmove="handleTouchMove"
-  capture-bind:touchend="handleTouchEnd"
-  capture-bind:touchcancel="handleTouchCancel">
+<view class="container">
   <view class="hero-shell">
-    <view class="hero {{heroTransitionClass}}">
+    <view class="hero">
       <view class="hero-top-row">
         <view class="hero-arrow" bindtap="prevDate" hover-class="hero-arrow-hover">
           <image class="hero-arrow-icon hero-arrow-left" src="/images/icons/arrow-right.png" mode="aspectFit"></image>
@@ -34,7 +29,7 @@
     </view>
   </view>
 
-  <view class="filters-wrap {{heroTransitionClass}}">
+  <view class="filters-wrap">
     <view class="filters-card">
       <view class="filters-main" bindtap="showDatePicker">
         <image class="filters-icon" src="/images/icons/calendar.png" mode="aspectFit"></image>
@@ -55,39 +50,50 @@
     </view>
   </view>
 
-  <view class="content-shell {{contentTransitionClass}}">
-    <loading-state wx:if="{{loading && !matches.length}}"></loading-state>
+  <view class="content-shell">
+    <loading-state wx:if="{{loading && !paneItems.length}}"></loading-state>
 
     <error-state wx:elif="{{error}}" bind:retry="loadData"></error-state>
 
     <block wx:else>
-      <view class="meta-row">
-        <text class="matchday-text">{{currentMatchday}}</text>
-        <text class="cache-text" wx:if="{{isCached}}">{{cacheTime}}</text>
-      </view>
+      <swiper
+        class="content-swiper"
+        current="{{swiperCurrent}}"
+        duration="260"
+        skip-hidden-item-layout="{{true}}"
+        bindchange="onSwiperChange">
+        <swiper-item wx:for="{{paneItems}}" wx:key="key">
+          <scroll-view class="content-pane" scroll-y="{{true}}" enhanced="{{true}}" show-scrollbar="{{false}}">
+            <view class="meta-row">
+              <text class="matchday-text">{{item.currentMatchday}}</text>
+              <text class="cache-text" wx:if="{{item.isCached}}">{{item.cacheTime}}</text>
+            </view>
 
-      <view class="matches-list" wx:if="{{hasMatches}}">
-        <match-card
-          wx:for="{{matches}}"
-          wx:key="id"
-          match="{{item}}"
-          variant="fixtures"
-          bind:tap="onMatchTap">
-        </match-card>
-      </view>
+            <view class="matches-list" wx:if="{{item.hasMatches}}">
+              <match-card
+                wx:for="{{item.matches}}"
+                wx:key="id"
+                match="{{item}}"
+                variant="fixtures"
+                bind:tap="onMatchTap">
+              </match-card>
+            </view>
 
-      <empty-state
-        wx:else
-        title="该日期无比赛"
-        description="请选择其他日期查看"
-        show-action="{{true}}"
-        action-text="切换日期"
-        bind:action="showDatePicker">
-      </empty-state>
+            <empty-state
+              wx:else
+              title="该日期暂无比赛"
+              description="请选择其他日期查看"
+              show-action="{{true}}"
+              action-text="切换日期"
+              bind:action="showDatePicker">
+            </empty-state>
 
-      <view class="load-more" wx:if="{{hasMatches && !loading}}">
-        <text>已经到底了</text>
-      </view>
+            <view class="load-more" wx:if="{{item.hasMatches}}">
+              <text>已经到底了</text>
+            </view>
+          </scroll-view>
+        </swiper-item>
+      </swiper>
     </block>
   </view>
 </view>

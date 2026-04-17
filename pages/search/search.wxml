@@ -1,5 +1,4 @@
 <view class="container">
-  <!-- 搜索框 -->
   <view class="search-bar">
     <image class="search-icon" src="/images/icons/search.png" mode="aspectFit"></image>
     <input
@@ -12,28 +11,23 @@
       confirm-type="search">
     </input>
     <view class="clear-btn" wx:if="{{keyword}}" bindtap="onClear">
-      <text class="clear-icon">✕</text>
+      <text class="clear-icon">×</text>
     </view>
   </view>
 
-  <!-- 搜索中 -->
   <view class="state-tip" wx:if="{{searching}}">
     <text>搜索中...</text>
   </view>
 
-  <!-- 空关键词提示 -->
   <view class="state-tip hint" wx:elif="{{!keyword}}">
     <text>输入球队或球员名称</text>
   </view>
 
-  <!-- 无结果 -->
   <view class="state-tip" wx:elif="{{hasSearched && !teams.length && !players.length}}">
-    <text>未找到"{{keyword}}"相关结果</text>
+    <text>未找到“{{keyword}}”相关结果</text>
   </view>
 
-  <!-- 搜索结果 -->
   <block wx:elif="{{hasSearched}}">
-    <!-- 球队结果 -->
     <view class="result-section" wx:if="{{teams.length}}">
       <view class="result-title">球队（{{teams.length}}）</view>
       <view class="result-list">
@@ -54,7 +48,6 @@
       </view>
     </view>
 
-    <!-- 球员结果 -->
     <view class="result-section" wx:if="{{players.length}}">
       <view class="result-title">球员（{{players.length}}）</view>
       <view class="result-list">
@@ -68,7 +61,7 @@
           <image class="item-photo" src="{{item.photo}}" mode="aspectFill"></image>
           <view class="item-info">
             <text class="item-name">{{item.name}}</text>
-            <text class="item-sub">{{item.position}}{{item.nationality ? ' · ' + item.nationality : ''}}</text>
+            <text class="item-sub">{{item.positionLabel || item.chinesePosition || item.position}}{{item.nationalityLabel || item.chineseNationality || item.nationality ? ' · ' + (item.nationalityLabel || item.chineseNationality || item.nationality) : ''}}</text>
           </view>
           <image class="arrow-icon" src="/images/icons/arrow-right.png" mode="aspectFit"></image>
         </view>

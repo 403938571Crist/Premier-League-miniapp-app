@@ -1,9 +1,46 @@
 const { getFixtures } = require('../../utils/api');
 const { formatDate } = require('../../utils/util');
-const { getNewsList, getPlayerSocial } = require('../../utils/news-api');
-const staticSocialItems = require('../../utils/social-data');
+const { getNewsList } = require('../../utils/news-api');
 
 const SHOW_REFRESH_INTERVAL = 2 * 60 * 1000;
+const NEWS_PAGE_SIZE = 10;
+const FEATURED_LOOKAHEAD_DAYS = 10;
+const NEWS_PLACEHOLDER_THEME = 'media';
+const LIVE_STATUSES = ['LIVE', 'IN_PLAY', 'PAUSED'];
+const UPCOMING_STATUSES = ['SCHEDULED', 'TIMED', 'NOT_STARTED'];
+const EXCLUDED_STATUSES = ['FINISHED', 'AWARDED', 'POSTPONED', 'SUSPENDED', 'CANCELED', 'CANCELLED'];
+const FEATURED_TEAM_WEIGHTS = {
+  57: 10,
+  58: 8,
+  61: 10,
+  64: 10,
+  65: 10,
+  66: 10,
+  67: 8,
+  73: 9
+};
+const FEATURED_PAIR_BONUS = {
+  '57-61': 8,
+  '57-64': 10,
+  '57-65': 10,
+  '57-66': 9,
+  '57-73': 10,
+  '58-67': 6,
+  '61-64': 9,
+  '61-65': 9,
+  '61-66': 10,
+  '61-73': 9,
+  '64-65': 10,
+  '64-66': 10,
+  '64-67': 7,
+  '64-73': 9,
+  '65-66': 10,
+  '65-67': 7,
+  '65-73': 8,
+  '66-67': 7,
+  '66-73': 8,
+  '67-73': 6
+};
 
 Page({
   data: {
@@ -11,11 +48,13 @@ Page({
     error: null,
     featuredMatches: [],
     newsItems: [],
-    socialItems: [],
     todayDate: '',
     isCached: false,
     cacheTime: '',
-    lastLoadedAt: 0
+    lastLoadedAt: 0,
+    newsPage: 1,
+    newsHasMore: true,
+    newsLoadingMore: false
   },
 
   onLoad() {
@@ -47,29 +86,15 @@ Page({
   },
 
   async loadData(useCache = true) {
-    this.setData({ loading: true, error: null });
+    this.setData({ loading: true, error: null, newsPage: 1, newsHasMore: true });
 
-    const [fixturesResult, newsResult, socialResult] = await Promise.allSettled([
-      getFixtures(
-        {
-          dateFrom: this.getTodayDate(),
-          dateTo: this.getTodayDate()
-        },
-        useCache
-      ),
-      getNewsList(
-        {
-          page: 1,
-          pageSize: 6
-        },
-        useCache
-      ),
-      getPlayerSocial()
+    const [fixturesResult, newsResult] = await Promise.allSettled([
+      this.loadMatches(useCache),
+      getNewsList({ page: 1, pageSize: NEWS_PAGE_SIZE }, useCache)
     ]);
 
     const fixturesData = fixturesResult.status === 'fulfilled' ? fixturesResult.value : null;
     const newsData = newsResult.status === 'fulfilled' ? newsResult.value : null;
-    const rawSocial = socialResult.status === 'fulfilled' ? socialResult.value : null;
 
     if (!fixturesData && !newsData) {
       const error = fixturesResult.reason || newsResult.reason || new Error('Load failed');
@@ -92,31 +117,57 @@ Page({
       console.error('Failed to load news:', newsResult.reason);
     }
 
+    const newsList = this.prepareNewsItems(newsData?.list || []);
     this.setData({
       loading: false,
       featuredMatches: this.selectFeaturedMatches(fixturesData?.matches || []),
-      newsItems: newsData?.list || [],
-      socialItems: this.normalizeSocialItems(rawSocial),
+      newsItems: newsList,
+      newsHasMore: newsList.length >= NEWS_PAGE_SIZE,
       lastLoadedAt: Date.now(),
       ...this.getCacheInfo(fixturesData, newsData)
     });
   },
 
-  normalizeSocialItems(apiData) {
-    if (!Array.isArray(apiData) || !apiData.length) {
-      return staticSocialItems;
+  onReachBottom() {
+    if (this.data.newsLoadingMore || !this.data.newsHasMore) {
+      return;
     }
 
-    return apiData.map((item) => ({
-      id: item.id,
-      playerName: item.playerName || '',
-      team: item.teamName || '',
-      handle: item.handle || '',
-      platform: item.platform || '',
-      summary: item.summary || '',
-      url: item.profileUrl || '',
-      note: item.summary || ''
-    }));
+    this.loadMoreNews();
+  },
+
+  async loadMoreNews() {
+    this.setData({ newsLoadingMore: true });
+    const nextPage = this.data.newsPage + 1;
+
+    try {
+      const newsData = await getNewsList({ page: nextPage, pageSize: NEWS_PAGE_SIZE }, false);
+      const newItems = this.prepareNewsItems(newsData?.list || []);
+
+      this.setData({
+        newsItems: [...this.data.newsItems, ...newItems],
+        newsPage: nextPage,
+        newsHasMore: newItems.length >= NEWS_PAGE_SIZE,
+        newsLoadingMore: false
+      });
+    } catch (error) {
+      console.error('Load more news failed:', error);
+      this.setData({ newsLoadingMore: false });
+    }
+  },
+
+  async loadMatches(useCache) {
+    const startDate = new Date();
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + FEATURED_LOOKAHEAD_DAYS);
+
+    return getFixtures(
+      {
+        dateFrom: formatDate(startDate, 'YYYY-MM-DD'),
+        dateTo: formatDate(endDate, 'YYYY-MM-DD')
+      },
+      useCache
+    );
   },
 
   getCacheInfo(fixturesResult, newsResult) {
@@ -130,6 +181,7 @@ Page({
     }
 
     const minutesAgo = Math.floor((Date.now() - cacheSource.cachedAt) / 60000);
+
     return {
       isCached: true,
       cacheTime: minutesAgo < 1 ? '刚刚更新' : `${minutesAgo} 分钟前`
@@ -140,33 +192,83 @@ Page({
     return formatDate(new Date(), 'YYYY-MM-DD');
   },
 
+  prepareNewsItems(list = []) {
+    return list.map((item) => ({
+      ...item,
+      _coverState: item.coverImage ? 'loading' : 'placeholder',
+      _coverThemeResolved: item.coverTheme || NEWS_PLACEHOLDER_THEME
+    }));
+  },
+
+  getMatchCalendarDate(match) {
+    if (!match || !match.utcDate) {
+      return '';
+    }
+
+    const date = new Date(match.utcDate);
+    if (Number.isNaN(date.getTime())) {
+      return '';
+    }
+
+    return formatDate(date, 'YYYY-MM-DD');
+  },
+
+  isFeaturedCandidate(match) {
+    const status = match?.status || '';
+
+    if (LIVE_STATUSES.includes(status) || UPCOMING_STATUSES.includes(status)) {
+      return true;
+    }
+
+    return !EXCLUDED_STATUSES.includes(status);
+  },
+
+  getFeaturedPairKey(match) {
+    const ids = [match?.homeTeam?.id, match?.awayTeam?.id]
+      .filter(Boolean)
+      .map((id) => Number(id))
+      .sort((a, b) => a - b);
+
+    return ids.length === 2 ? `${ids[0]}-${ids[1]}` : '';
+  },
+
+  getFeaturedPriority(match) {
+    const homeId = Number(match?.homeTeam?.id || 0);
+    const awayId = Number(match?.awayTeam?.id || 0);
+    const pairKey = this.getFeaturedPairKey(match);
+    const homeWeight = FEATURED_TEAM_WEIGHTS[homeId] || 0;
+    const awayWeight = FEATURED_TEAM_WEIGHTS[awayId] || 0;
+    const pairBonus = FEATURED_PAIR_BONUS[pairKey] || 0;
+    const featuredTeamsCount = [homeWeight, awayWeight].filter((value) => value > 0).length;
+    const liveBonus = LIVE_STATUSES.includes(match?.status) ? 100 : 0;
+    const doubleGiantBonus = featuredTeamsCount === 2 ? 12 : 0;
+    const singleGiantBonus = featuredTeamsCount === 1 ? 4 : 0;
+
+    return liveBonus + homeWeight + awayWeight + pairBonus + doubleGiantBonus + singleGiantBonus;
+  },
+
   selectFeaturedMatches(matches) {
-    const sorted = [...matches].sort((a, b) => {
-      const statusOrder = {
-        LIVE: 0,
-        IN_PLAY: 0,
-        PAUSED: 0,
-        SCHEDULED: 1,
-        TIMED: 1,
-        FINISHED: 2
-      };
-      return (statusOrder[a.status] || 3) - (statusOrder[b.status] || 3);
-    });
+    const upcomingMatches = [...matches]
+      .filter((match) => this.isFeaturedCandidate(match))
+      .sort((a, b) => new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime());
 
-    return sorted.slice(0, 3);
-  },
+    if (!upcomingMatches.length) {
+      return [];
+    }
 
-  onSearchTap() {
-    wx.navigateTo({
-      url: '/pages/search/search'
-    });
-  },
+    const targetDate = this.getMatchCalendarDate(upcomingMatches[0]);
 
-  onDatePick() {
-    wx.showToast({
-      title: '日期选择功能开发中',
-      icon: 'none'
-    });
+    return upcomingMatches
+      .filter((match) => this.getMatchCalendarDate(match) === targetDate)
+      .sort((a, b) => {
+        const priorityDiff = this.getFeaturedPriority(b) - this.getFeaturedPriority(a);
+        if (priorityDiff !== 0) {
+          return priorityDiff;
+        }
+
+        return new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime();
+      })
+      .slice(0, 3);
   },
 
   onMatchTap(e) {
@@ -175,33 +277,40 @@ Page({
 
   onNewsTap(e) {
     const { id } = e.currentTarget.dataset;
-    if (!id) return;
+    if (!id) {
+      return;
+    }
 
     wx.navigateTo({
       url: `/pages/news-detail/news-detail?id=${id}`
     });
   },
 
-  onSocialTap(e) {
-    const { id } = e.currentTarget.dataset;
-    const item = this.data.socialItems.find((social) => social.id === id);
-    if (!item) return;
+  onNewsImageLoad(e) {
+    const { index } = e.currentTarget.dataset || {};
+    if (index === undefined || index === null) {
+      return;
+    }
 
-    wx.showActionSheet({
-      itemList: ['查看简介', '复制主页链接'],
-      success: (res) => {
-        if (res.tapIndex === 0) {
-          wx.showModal({
-            title: `${item.playerName} ${item.handle}`,
-            content: `${item.team} / ${item.platform}\n\n${item.summary}\n\n${item.note}`,
-            showCancel: false
-          });
-        } else if (res.tapIndex === 1) {
-          wx.setClipboardData({
-            data: item.url
-          });
-        }
-      }
+    this.setData({
+      [`newsItems[${index}]._coverState`]: 'ready'
+    });
+  },
+
+  onNewsImageError(e) {
+    const { index } = e.currentTarget.dataset || {};
+    if (index === undefined || index === null) {
+      return;
+    }
+
+    const currentItem = this.data.newsItems[index];
+    if (!currentItem || !currentItem.coverImage) {
+      return;
+    }
+
+    this.setData({
+      [`newsItems[${index}].coverImage`]: '',
+      [`newsItems[${index}]._coverState`]: 'placeholder'
     });
   },
 

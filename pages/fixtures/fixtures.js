@@ -1,10 +1,9 @@
 const { getFixtures } = require('../../utils/api');
 const { formatDate } = require('../../utils/util');
 
-const SWIPE_THRESHOLD = 50;
-const SWITCH_OUT_DURATION = 70;
-const SWITCH_IN_DURATION = 140;
 const SHOW_REFRESH_INTERVAL = 2 * 60 * 1000;
+const SWIPER_CENTER_INDEX = 1;
+const SWIPER_DURATION = 260;
 
 const TABS = {
   ALL: 'ALL',
@@ -21,8 +20,8 @@ Page({
     currentMatchday: '',
     heroEyebrow: '比赛日',
     heroTitle: '焦点对决',
-    filterWeek: '周六',
-    filterDate: '04月11日',
+    filterWeek: '',
+    filterDate: '',
     matches: [],
     allMatches: [],
     hasMatches: false,
@@ -30,17 +29,13 @@ Page({
     cacheTime: '',
     activeTab: TABS.ALL,
     isDateSwitching: false,
-    contentTransitionClass: '',
-    heroTransitionClass: '',
-    lastLoadedAt: 0
+    lastLoadedAt: 0,
+    swiperCurrent: SWIPER_CENTER_INDEX,
+    paneItems: []
   },
 
   selectedDate: null,
-  touchStartX: 0,
-  touchStartY: 0,
-  touchEndX: 0,
-  touchEndY: 0,
-  isTouchTracking: false,
+  isResettingSwiper: false,
 
   onLoad() {
     this.selectedDate = new Date();
@@ -69,26 +64,50 @@ Page({
     });
   },
 
-  updateDateDisplay() {
-    const date = this.selectedDate;
+  getDateByOffset(offset, baseDate = this.selectedDate) {
+    const nextDate = new Date(baseDate);
+    nextDate.setDate(nextDate.getDate() + offset);
+    return nextDate;
+  },
+
+  formatDateLabel(date) {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
+    return `${month}月${day}日`;
+  },
 
+  updateDateDisplay() {
+    const date = this.selectedDate;
     this.setData({
       filterWeek: WEEKDAY_ZH[date.getDay()],
-      filterDate: `${month}月${day}日`
+      filterDate: this.formatDateLabel(date)
     });
   },
 
+  buildDateQuery(date) {
+    const dateStr = formatDate(date, 'YYYY-MM-DD');
+    return {
+      dateFrom: dateStr,
+      dateTo: dateStr
+    };
+  },
+
+  requestDateFixtures(date, useCache = true) {
+    return getFixtures(this.buildDateQuery(date), useCache);
+  },
+
   getCacheInfo(result) {
-    if (!result.isCached || !result.cachedAt) {
-      return { isCached: false, cacheTime: '' };
+    if (!result?.isCached || !result?.cachedAt) {
+      return {
+        isCached: false,
+        cacheTime: ''
+      };
     }
 
     const minutesAgo = Math.floor((Date.now() - result.cachedAt) / 60000);
     return {
       isCached: true,
-      cacheTime: minutesAgo < 1 ? '刚刚更新' : `${minutesAgo}分钟前更新`
+      cacheTime: minutesAgo < 1 ? '刚刚更新' : `${minutesAgo} 分钟前`
     };
   },
 
@@ -116,7 +135,7 @@ Page({
     return ['FINISHED', 'AWARDED'].includes(status);
   },
 
-  applyTabFilter(matches = this.data.allMatches, activeTab = this.data.activeTab) {
+  applyTabFilter(matches = [], activeTab = this.data.activeTab) {
     if (activeTab === TABS.LIVE) {
       return matches.filter((match) => this.isLiveStatus(match.status));
     }
@@ -128,48 +147,77 @@ Page({
     return matches;
   },
 
+  buildPaneItem(date, result) {
+    const allMatches = result?.matches || [];
+    const matches = this.applyTabFilter(allMatches, this.data.activeTab);
+    const cacheInfo = this.getCacheInfo(result);
+
+    return {
+      key: formatDate(date, 'YYYY-MM-DD'),
+      date: formatDate(date, 'YYYY-MM-DD'),
+      weekLabel: WEEKDAY_ZH[date.getDay()],
+      dateLabel: this.formatDateLabel(date),
+      allMatches,
+      matches,
+      hasMatches: matches.length > 0,
+      currentMatchday: this.getMatchdayText(allMatches),
+      heroEyebrow: this.getHeroEyebrow(allMatches),
+      isCached: cacheInfo.isCached,
+      cacheTime: cacheInfo.cacheTime
+    };
+  },
+
+  applyCurrentPane(paneItem) {
+    this.setData({
+      allMatches: paneItem.allMatches,
+      matches: paneItem.matches,
+      hasMatches: paneItem.hasMatches,
+      currentMatchday: paneItem.currentMatchday,
+      heroEyebrow: paneItem.heroEyebrow,
+      filterWeek: paneItem.weekLabel,
+      filterDate: paneItem.dateLabel,
+      isCached: paneItem.isCached,
+      cacheTime: paneItem.cacheTime
+    });
+  },
+
   async loadData(useCache = true, options = {}) {
-    const { silent = false, preserveContent = false } = options;
+    const { silent = false } = options;
+    const baseDate = this.selectedDate;
+    const prevDate = this.getDateByOffset(-1, baseDate);
+    const nextDate = this.getDateByOffset(1, baseDate);
 
     this.setData({
       loading: silent ? this.data.loading : true,
-      error: null,
-      matches: preserveContent ? this.data.matches : [],
-      hasMatches: preserveContent ? this.data.hasMatches : false
+      error: null
     });
 
     try {
-      const dateStr = formatDate(this.selectedDate, 'YYYY-MM-DD');
-      const result = await getFixtures(
-        {
-          dateFrom: dateStr,
-          dateTo: dateStr
-        },
-        useCache
-      );
+      const [prevResult, currentResult, nextResult] = await Promise.all([
+        this.requestDateFixtures(prevDate, useCache),
+        this.requestDateFixtures(baseDate, useCache),
+        this.requestDateFixtures(nextDate, useCache)
+      ]);
 
-      const allMatches = result.matches || [];
-      const filteredMatches = this.applyTabFilter(allMatches, this.data.activeTab);
+      const paneItems = [
+        this.buildPaneItem(prevDate, prevResult),
+        this.buildPaneItem(baseDate, currentResult),
+        this.buildPaneItem(nextDate, nextResult)
+      ];
 
       this.setData({
         loading: false,
-        allMatches,
-        matches: filteredMatches,
-        hasMatches: filteredMatches.length > 0,
-        currentMatchday: this.getMatchdayText(allMatches),
-        heroEyebrow: this.getHeroEyebrow(allMatches),
-        lastLoadedAt: Date.now(),
-        ...this.getCacheInfo(result)
+        error: null,
+        paneItems,
+        swiperCurrent: SWIPER_CENTER_INDEX,
+        lastLoadedAt: Date.now()
       });
+
+      this.applyCurrentPane(paneItems[SWIPER_CENTER_INDEX]);
     } catch (error) {
-      console.error('加载赛程失败:', error);
+      console.error('Failed to load fixtures:', error);
       this.setData({
         loading: false,
-        allMatches: preserveContent ? this.data.allMatches : [],
-        matches: preserveContent ? this.data.matches : [],
-        hasMatches: preserveContent ? this.data.hasMatches : false,
-        currentMatchday: preserveContent ? this.data.currentMatchday : '',
-        heroEyebrow: preserveContent ? this.data.heroEyebrow : '比赛日',
         error: {
           title: '加载失败',
           description: error.message || '请检查网络连接后重试'
@@ -184,130 +232,76 @@ Page({
       return;
     }
 
-    const nextMatches = this.applyTabFilter(this.data.allMatches, nextTab);
+    const paneItems = (this.data.paneItems || []).map((paneItem) => ({
+      ...paneItem,
+      matches: this.applyTabFilter(paneItem.allMatches, nextTab),
+      hasMatches: this.applyTabFilter(paneItem.allMatches, nextTab).length > 0
+    }));
 
     this.setData({
       activeTab: nextTab,
-      matches: nextMatches,
-      hasMatches: nextMatches.length > 0
+      paneItems
     });
+
+    const currentPane = paneItems[SWIPER_CENTER_INDEX];
+    if (currentPane) {
+      this.applyCurrentPane(currentPane);
+    }
   },
 
   prevDate() {
-    return this.changeDateBy(-1);
+    return this.shiftDate(-1);
   },
 
   nextDate() {
-    return this.changeDateBy(1);
+    return this.shiftDate(1);
   },
 
-  async changeDateBy(offset) {
+  async shiftDate(offset) {
     if (this.data.isDateSwitching) {
       return;
     }
 
-    const exitClass = offset > 0 ? 'slide-next-out' : 'slide-prev-out';
-    const enterClass = offset > 0 ? 'slide-next-in' : 'slide-prev-in';
-    const nextDate = new Date(this.selectedDate);
-    nextDate.setDate(nextDate.getDate() + offset);
-
-    this.setData({
-      isDateSwitching: true,
-      heroTransitionClass: exitClass,
-      contentTransitionClass: exitClass
-    });
-
-    await this.wait(SWITCH_OUT_DURATION);
-
-    this.selectedDate = nextDate;
+    this.setData({ isDateSwitching: true });
+    this.selectedDate = this.getDateByOffset(offset);
     this.updateDateDisplay();
-    await this.loadData(true, {
-      silent: true,
-      preserveContent: true
-    });
-
-    this.setData({
-      heroTransitionClass: enterClass,
-      contentTransitionClass: enterClass
-    });
-
-    await this.wait(SWITCH_IN_DURATION);
-
-    this.setData({
-      isDateSwitching: false,
-      heroTransitionClass: '',
-      contentTransitionClass: ''
-    });
+    await this.loadData(true, { silent: true });
+    this.setData({ isDateSwitching: false });
   },
 
-  handleTouchStart(e) {
-    const touch = (e.touches && e.touches[0]) || (e.changedTouches && e.changedTouches[0]);
-    if (!touch) {
+  async onSwiperChange(e) {
+    const current = e.detail.current;
+
+    if (this.isResettingSwiper || current === SWIPER_CENTER_INDEX || this.data.isDateSwitching) {
       return;
     }
 
-    this.isTouchTracking = true;
-    this.touchStartX = touch.clientX;
-    this.touchStartY = touch.clientY;
-    this.touchEndX = touch.clientX;
-    this.touchEndY = touch.clientY;
+    const offset = current < SWIPER_CENTER_INDEX ? -1 : 1;
+    const paneItem = this.data.paneItems[current];
+
+    if (!paneItem) {
+      this.resetSwiperToCenter();
+      return;
+    }
+
+    this.setData({ isDateSwitching: true });
+    this.selectedDate = new Date(`${paneItem.date}T00:00:00`);
+    this.applyCurrentPane(paneItem);
+
+    await this.loadData(true, { silent: true });
+    this.setData({ isDateSwitching: false });
+
+    if (offset !== 0) {
+      this.resetSwiperToCenter();
+    }
   },
 
-  handleTouchMove(e) {
-    if (!this.isTouchTracking) {
-      return;
-    }
-
-    const touch = (e.touches && e.touches[0]) || (e.changedTouches && e.changedTouches[0]);
-    if (!touch) {
-      return;
-    }
-
-    this.touchEndX = touch.clientX;
-    this.touchEndY = touch.clientY;
-  },
-
-  handleTouchEnd(e) {
-    if (!this.isTouchTracking) {
-      return;
-    }
-
-    const touch = e && ((e.changedTouches && e.changedTouches[0]) || (e.touches && e.touches[0]));
-    if (touch) {
-      this.touchEndX = touch.clientX;
-      this.touchEndY = touch.clientY;
-    }
-
-    this.isTouchTracking = false;
-
-    if (this.data.isDateSwitching) {
-      this.resetTouchTracking();
-      return;
-    }
-
-    const deltaX = this.touchEndX - this.touchStartX;
-    const deltaY = this.touchEndY - this.touchStartY;
-    const absX = Math.abs(deltaX);
-    const absY = Math.abs(deltaY);
-
-    if (absX < SWIPE_THRESHOLD || absX <= absY) {
-      this.resetTouchTracking();
-      return;
-    }
-
-    if (deltaX > 0) {
-      this.prevDate();
-      this.resetTouchTracking();
-      return;
-    }
-
-    this.nextDate();
-    this.resetTouchTracking();
-  },
-
-  handleTouchCancel() {
-    this.isTouchTracking = false;
-    this.resetTouchTracking();
+  resetSwiperToCenter() {
+    this.isResettingSwiper = true;
+    this.setData({ swiperCurrent: SWIPER_CENTER_INDEX });
+    setTimeout(() => {
+      this.isResettingSwiper = false;
+    }, SWIPER_DURATION + 20);
   },
 
   showDatePicker() {
@@ -333,35 +327,30 @@ Page({
 
   showStatusSheet() {
     wx.showActionSheet({
-      itemList: ['全部比赛', '直播中', '已结束'],
+      itemList: ['全部比赛', '进行中', '已结束'],
       success: (res) => {
         const tabMap = [TABS.ALL, TABS.LIVE, TABS.RESULTS];
         const nextTab = tabMap[res.tapIndex];
-        const nextMatches = this.applyTabFilter(this.data.allMatches, nextTab);
+        const paneItems = (this.data.paneItems || []).map((paneItem) => ({
+          ...paneItem,
+          matches: this.applyTabFilter(paneItem.allMatches, nextTab),
+          hasMatches: this.applyTabFilter(paneItem.allMatches, nextTab).length > 0
+        }));
+
         this.setData({
           activeTab: nextTab,
-          matches: nextMatches,
-          hasMatches: nextMatches.length > 0
+          paneItems
         });
+
+        const currentPane = paneItems[SWIPER_CENTER_INDEX];
+        if (currentPane) {
+          this.applyCurrentPane(currentPane);
+        }
       }
     });
   },
 
   onMatchTap(e) {
-    const match = e.detail.match;
-    console.log('点击比赛:', match);
-  },
-
-  wait(duration) {
-    return new Promise((resolve) => {
-      setTimeout(resolve, duration);
-    });
-  },
-
-  resetTouchTracking() {
-    this.touchStartX = 0;
-    this.touchStartY = 0;
-    this.touchEndX = 0;
-    this.touchEndY = 0;
+    console.log('Match tapped:', e.detail.match);
   }
 });

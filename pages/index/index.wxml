@@ -1,29 +1,14 @@
 <view class="container">
-  <!-- 搜索栏和日期选择 -->
-  <view class="search-bar">
-    <view class="search-input" bindtap="onSearchTap">
-      <image class="search-icon" src="/images/icons/search.png" mode="aspectFit"></image>
-      <text class="search-placeholder">搜索球队或球员</text>
-    </view>
-    <view class="date-picker" bindtap="onDatePick">
-      <image class="date-icon" src="/images/icons/calendar.png" mode="aspectFit"></image>
-    </view>
-  </view>
-
-  <!-- 加载状态 -->
   <loading-state wx:if="{{loading && !featuredMatches.length}}"></loading-state>
 
-  <!-- 错误状态 -->
-  <error-state 
-    wx:elif="{{error}}" 
+  <error-state
+    wx:elif="{{error}}"
     title="{{error.title}}"
     description="{{error.description}}"
     bind:retry="loadData">
   </error-state>
 
-  <!-- 内容区域 -->
   <block wx:else>
-    <!-- 焦点比赛轮播 -->
     <view class="featured-section" wx:if="{{featuredMatches.length > 0}}">
       <view class="featured-head">
         <view class="featured-copy">
@@ -43,8 +28,8 @@
           duration="220">
           <swiper-item wx:for="{{featuredMatches}}" wx:key="id">
             <view class="featured-card-wrap">
-              <match-card 
-                match="{{item}}" 
+              <match-card
+                match="{{item}}"
                 is-highlight="{{true}}"
                 bind:tap="onMatchTap">
               </match-card>
@@ -54,7 +39,6 @@
       </view>
     </view>
 
-    <!-- 快捷入口 -->
     <view class="quick-access">
       <view class="quick-item" bindtap="goToStandings">
         <view class="quick-icon-wrap">
@@ -79,7 +63,6 @@
       </view>
     </view>
 
-    <!-- 英超资讯 -->
     <view class="section">
       <view class="section-header">
         <view class="section-title">
@@ -88,12 +71,10 @@
         </view>
       </view>
 
-      <!-- 缓存提示 -->
       <view class="cache-tip" wx:if="{{isCached}}">
         <text>数据来自缓存 · {{cacheTime}}</text>
       </view>
 
-      <!-- 资讯列表 -->
       <view class="news-list" wx:if="{{newsItems.length > 0}}">
         <view
           class="news-card"
@@ -101,67 +82,58 @@
           wx:key="id"
           bindtap="onNewsTap"
           data-id="{{item.id}}">
-          <view class="news-cover news-cover-{{item.coverTheme}}">
-            <view class="news-cover-top">
-              <text class="news-cover-tag">{{item.tag}}</text>
-              <text class="news-cover-type">{{item.mediaType}}</text>
+          <view class="news-cover news-cover-image-shell news-cover-{{item._coverThemeResolved}} {{item._coverState === 'ready' ? 'news-cover-live' : 'news-cover-placeholder-shell'}}">
+            <view class="news-cover-placeholder">
+              <view class="news-cover-placeholder-badge">
+                <image class="news-cover-placeholder-icon" src="/images/icons/news.png" mode="aspectFit"></image>
+              </view>
+              <text class="news-cover-placeholder-source">{{item.source || 'Premier League'}}</text>
             </view>
-            <view class="news-cover-body">
-              <image class="news-cover-icon" src="/images/icons/news.png" mode="aspectFit"></image>
-              <view class="news-cover-copy">
-                <text class="news-cover-source">{{item.source}}</text>
-                <text class="news-cover-title">{{item.title}}</text>
+            <image
+              wx:if="{{item.coverImage}}"
+              class="news-cover-img {{item._coverState === 'ready' ? 'is-ready' : 'is-hidden'}}"
+              src="{{item.coverImage}}"
+              mode="widthFix"
+              bindload="onNewsImageLoad"
+              binderror="onNewsImageError"
+              data-index="{{index}}"
+              lazy-load>
+            </image>
+            <view class="news-cover-overlay">
+              <view class="news-cover-top">
+                <text class="news-cover-chip">{{item.tag}}</text>
               </view>
             </view>
           </view>
-          <view class="news-card-head">
-            <text class="news-tag">{{item.source}}</text>
-            <text class="news-date">{{item.publishedAt}}</text>
-          </view>
-          <text class="news-card-title">{{item.title}}</text>
-          <text class="news-card-summary">{{item.summary}}</text>
-          <view class="news-card-footer">
-            <text class="news-source">{{item.mediaType}}</text>
-            <image class="news-arrow" src="/images/icons/arrow-right.png" mode="aspectFit"></image>
-          </view>
-        </view>
-      </view>
-
-      <!-- 空状态 -->
-      <empty-state 
-        wx:else
-        title="暂无资讯"
-        description="稍后再来查看最新英超动态">
-      </empty-state>
-    </view>
-
-    <view class="section social-section">
-      <view class="section-header">
-        <view class="section-title">
-          <image class="section-icon" src="/images/icons/star.png" mode="aspectFit"></image>
-          <text>球员社媒</text>
-        </view>
-      </view>
-
-      <view class="social-list">
-        <view
-          class="social-card"
-          wx:for="{{socialItems}}"
-          wx:key="id"
-          bindtap="onSocialTap"
-          data-id="{{item.id}}">
-          <view class="social-avatar">{{item.playerName[0]}}</view>
-          <view class="social-main">
-            <view class="social-top">
-              <text class="social-name">{{item.playerName}}</text>
-              <text class="social-platform">{{item.platform}}</text>
+          <view class="news-card-body">
+            <view class="news-card-head">
+              <text class="news-tag">{{item.source}}</text>
+              <text class="news-date">{{item.publishedAt}}</text>
             </view>
-            <text class="social-handle">{{item.handle}}</text>
-            <text class="social-summary">{{item.team}} · {{item.summary}}</text>
+            <text class="news-card-title">{{item.title}}</text>
+            <text class="news-card-summary">{{item.summary}}</text>
+            <view class="news-card-footer">
+              <text class="news-source">{{item.mediaType}}</text>
+              <image class="news-arrow" src="/images/icons/arrow-right.png" mode="aspectFit"></image>
+            </view>
           </view>
-          <image class="social-arrow" src="/images/icons/arrow-right.png" mode="aspectFit"></image>
         </view>
       </view>
+
+      <view class="load-more" wx:if="{{newsItems.length > 0}}">
+        <view wx:if="{{newsLoadingMore}}">
+          <text class="load-more-text">加载中...</text>
+        </view>
+        <view wx:elif="{{!newsHasMore}}">
+          <text class="load-more-text load-more-end">没有更多了</text>
+        </view>
+      </view>
+
+      <empty-state
+        wx:elif="{{!newsItems.length}}"
+        title="暂无资讯"
+        description="稍后再来看最新英超动态">
+      </empty-state>
     </view>
   </block>
 </view>

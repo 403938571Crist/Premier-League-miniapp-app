@@ -32,30 +32,47 @@
   </view>
 
   <view class="article-card">
-    <view class="article-note">
+    <view class="article-note" wx:if="{{article.sourceNote}}">
       <text>{{article.sourceNote}}</text>
     </view>
 
-    <block wx:for="{{article.blocks}}" wx:key="index">
-      <view class="article-block" wx:if="{{item.type === 'paragraph'}}">
-        <text class="article-paragraph">{{item.text}}</text>
-      </view>
-
-      <view class="article-block quote-block" wx:elif="{{item.type === 'quote'}}">
-        <text class="article-quote">{{item.text}}</text>
-      </view>
-
-      <view class="article-block" wx:elif="{{item.type === 'bullet'}}">
-        <view class="bullet-item" wx:for="{{item.items}}" wx:key="index">
-          <view class="bullet-dot"></view>
-          <text class="bullet-text">{{item}}</text>
+    <!-- 有结构化正文 -->
+    <block wx:if="{{article.blocks.length > 0}}">
+      <block wx:for="{{article.blocks}}" wx:key="index">
+        <view class="article-block" wx:if="{{item.type === 'paragraph'}}">
+          <text class="article-paragraph">{{item.text}}</text>
         </view>
-      </view>
+        <view class="article-block quote-block" wx:elif="{{item.type === 'quote'}}">
+          <text class="article-quote">{{item.text}}</text>
+        </view>
+        <view class="article-block" wx:elif="{{item.type === 'bullet'}}">
+          <view class="bullet-item" wx:for="{{item.items}}" wx:key="index">
+            <view class="bullet-dot"></view>
+            <text class="bullet-text">{{item}}</text>
+          </view>
+        </view>
+        <view class="article-block article-image-block" wx:elif="{{item.type === 'image'}}">
+          <image class="article-image" src="{{item.text}}" mode="widthFix" lazy-load></image>
+        </view>
+      </block>
     </block>
+
+    <!-- 有摘要但无正文 -->
+    <view wx:elif="{{article.summary}}">
+      <text class="article-paragraph">{{article.summary}}</text>
+    </view>
+
+    <!-- 无内容提示 -->
+    <view wx:else class="no-content-tip">
+      <text class="no-content-text">点击下方按钮查看完整文章</text>
+    </view>
   </view>
 
   <view class="action-row">
-    <view class="action-btn" bindtap="onCopyLink">
+    <view class="action-btn action-btn-primary" bindtap="onOpenWebview" wx:if="{{article.url}}">
+      <text>查看完整文章</text>
+    </view>
+    <view class="action-btn action-btn-secondary" bindtap="onCopyLink" wx:if="{{article.url}}">
       <text>复制原文链接</text>
     </view>
   </view>

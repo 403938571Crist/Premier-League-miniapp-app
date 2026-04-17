@@ -1,4 +1,4 @@
-const { getPlayerPosition, calculateAge } = require('../../utils/util');
+const { calculateAge } = require('../../utils/util');
 
 Component({
   properties: {
@@ -24,21 +24,16 @@ Component({
 
   methods: {
     processPlayerData(player) {
-      const { name, firstName, lastName, position, nationality, dateOfBirth, shirtNumber } = player;
-      
-      // 处理姓名
-      const displayName = name || `${firstName || ''} ${lastName || ''}`.trim();
-      
-      // 计算年龄
-      const age = calculateAge(dateOfBirth);
-      
+      const displayName = player.name || `${player.firstName || ''} ${player.lastName || ''}`.trim();
+      const age = calculateAge(player.dateOfBirth);
+
       this.setData({
         name: displayName,
-        photo: '/images/default/player.png', // API可能不直接提供照片
-        position: getPlayerPosition(position) || '未知',
-        nationality: nationality || '',
+        photo: player.photo || player.photoUrl || '/images/default/player.png',
+        position: player.positionLabel || player.chinesePosition || player.position || '未知',
+        nationality: player.nationalityLabel || player.chineseNationality || player.nationality || '',
         age,
-        number: shirtNumber || ''
+        number: player.shirtNumber || ''
       });
     },
 

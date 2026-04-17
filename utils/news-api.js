@@ -1,6 +1,8 @@
 const { formatDate } = require('./util');
 const { API_BASE_URL } = require('./env-config');
 
+const DEFAULT_API_BASE_URL = API_BASE_URL;
+
 const FILTERED_SOURCE_TYPES = ['bilibili', 'douyin'];
 
 const SOURCE_META = {
@@ -45,6 +47,12 @@ const SOURCE_META = {
     coverLabel: '球迷热议',
     coverTheme: 'reddit',
     coverAccent: '#FF4500'
+  },
+  zhibo8: {
+    label: '直播吧',
+    coverLabel: '直播吧快讯',
+    coverTheme: 'zhibo8',
+    coverAccent: '#E8380D'
   },
   media: {
     label: '媒体报道',

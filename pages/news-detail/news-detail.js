@@ -45,18 +45,26 @@ Page({
     }
   },
 
+  onOpenWebview() {
+    const { article } = this.data;
+    if (!article || !article.url) return;
+
+    wx.navigateTo({
+      url: `/pages/webview/webview?url=${encodeURIComponent(article.url)}&title=${encodeURIComponent(article.title || '')}`,
+      fail: () => {
+        // 降级：复制链接
+        wx.setClipboardData({ data: article.url });
+        wx.showToast({ title: '链接已复制', icon: 'success' });
+      }
+    });
+  },
+
   onCopyLink() {
     const { article } = this.data;
     if (!article || !article.url) {
-      wx.showToast({
-        title: '暂无原文链接',
-        icon: 'none'
-      });
+      wx.showToast({ title: '暂无原文链接', icon: 'none' });
       return;
     }
-
-    wx.setClipboardData({
-      data: article.url
-    });
+    wx.setClipboardData({ data: article.url });
   }
 });

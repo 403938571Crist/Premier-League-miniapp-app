@@ -1,58 +1,76 @@
 <block wx:if="{{isHighlight}}">
   <view class="match-card highlight" bindtap="onTap">
-    <view class="hero-top">
-      <view class="hero-round" wx:if="{{matchday}}">
-        <text class="hero-round-text">{{matchday}}</text>
-      </view>
-      <view class="hero-datetime">
-        <text class="hero-date">{{dateText}}</text>
-        <text class="hero-time">{{time}}</text>
-      </view>
+    <view class="hero-ambient">
+      <view class="hero-glow hero-glow-left"></view>
+      <view class="hero-glow hero-glow-right"></view>
+      <view class="hero-pitch-glow"></view>
+      <view class="hero-texture"></view>
+      <view class="hero-midline"></view>
+      <view class="hero-circle"></view>
+      <view class="hero-arc hero-arc-outer"></view>
+      <view class="hero-arc hero-arc-inner"></view>
     </view>
 
-    <view class="hero-main">
-      <view class="hero-team">
-        <image class="hero-team-logo" src="{{homeTeam.logo}}" mode="aspectFit" lazy-load></image>
-        <text class="hero-team-name ellipsis-2">{{homeTeam.name}}</text>
+    <view class="hero-content">
+      <view class="hero-top">
+        <view class="hero-round" wx:if="{{matchday}}">
+          <text class="hero-round-dot"></text>
+          <text class="hero-round-text">{{matchday}}</text>
+        </view>
+        <view class="hero-datetime">
+          <text class="hero-date">{{dateText}}</text>
+          <text class="hero-time">{{time}}</text>
+        </view>
       </view>
 
-      <view class="hero-score-section">
-        <block wx:if="{{status === 'FINISHED'}}">
-          <text class="hero-score">{{homeScore}}</text>
-          <text class="hero-score-divider">:</text>
-          <text class="hero-score">{{awayScore}}</text>
-        </block>
-        <block wx:elif="{{isLive}}">
-          <text class="hero-score live">{{homeScore}}</text>
-          <text class="hero-score-divider live">:</text>
-          <text class="hero-score live">{{awayScore}}</text>
+      <view class="hero-main">
+        <view class="hero-team">
+          <view class="hero-team-logo-shell">
+            <image class="hero-team-logo" src="{{homeTeam.logo}}" mode="aspectFit" lazy-load></image>
+          </view>
+          <text class="hero-team-name ellipsis-2">{{homeTeam.name}}</text>
+        </view>
+
+        <view class="hero-score-section">
+          <block wx:if="{{status === 'FINISHED'}}">
+            <text class="hero-score">{{homeScore}}</text>
+            <text class="hero-score-divider">:</text>
+            <text class="hero-score">{{awayScore}}</text>
+          </block>
+          <block wx:elif="{{isLive}}">
+            <text class="hero-score live">{{homeScore}}</text>
+            <text class="hero-score-divider live">:</text>
+            <text class="hero-score live">{{awayScore}}</text>
+          </block>
+          <block wx:else>
+            <text class="hero-score pending">-</text>
+            <text class="hero-score-divider pending">·</text>
+            <text class="hero-score pending">-</text>
+          </block>
+        </view>
+
+        <view class="hero-team">
+          <view class="hero-team-logo-shell">
+            <image class="hero-team-logo" src="{{awayTeam.logo}}" mode="aspectFit" lazy-load></image>
+          </view>
+          <text class="hero-team-name ellipsis-2">{{awayTeam.name}}</text>
+        </view>
+      </view>
+
+      <view class="hero-bottom">
+        <block wx:if="{{isLive}}">
+          <view class="hero-status-chip live-chip">
+            <text class="live-dot"></text>
+            <text class="hero-status-text live-text">{{statusText}} {{minute}}'</text>
+          </view>
         </block>
         <block wx:else>
-          <text class="hero-score pending">-</text>
-          <text class="hero-score-divider pending">:</text>
-          <text class="hero-score pending">-</text>
+          <view class="hero-status-chip">
+            <text class="hero-status-indicator {{statusClass}}"></text>
+            <text class="hero-status-text {{statusClass}}">{{statusText}}</text>
+          </view>
         </block>
       </view>
-
-      <view class="hero-team">
-        <image class="hero-team-logo" src="{{awayTeam.logo}}" mode="aspectFit" lazy-load></image>
-        <text class="hero-team-name ellipsis-2">{{awayTeam.name}}</text>
-      </view>
-    </view>
-
-    <view class="hero-bottom">
-      <block wx:if="{{isLive}}">
-        <view class="hero-status-chip live-chip">
-          <text class="live-dot"></text>
-          <text class="hero-status-text">直播中 {{minute}}'</text>
-        </view>
-      </block>
-      <block wx:else>
-        <view class="hero-status-chip">
-          <text class="hero-status-text {{statusClass}}">{{statusText}}</text>
-        </view>
-      </block>
-      <text class="hero-competition" wx:if="{{competition}}">{{competition}}</text>
     </view>
   </view>
 </block>

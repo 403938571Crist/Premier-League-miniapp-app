@@ -50,8 +50,8 @@
     "disableSWC": true
   },
   "compileType": "miniprogram",
-  "libVersion": "2.32.0",
-  "appid": "wxfe34b2a558aabd0c",
+  "libVersion": "3.15.2",
+  "appid": "wxe8319a19b69b6198",
   "projectname": "premier-league-miniapp",
   "condition": {},
   "editorSetting": {

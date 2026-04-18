@@ -10,20 +10,31 @@ const { TEAM_SHORT_NAMES, MATCH_STATUS_TEXT, MATCH_STATUS_STYLE, STANDING_ZONES,
  * @param {string} format - 格式
  * @returns {string}
  */
+/**
+ * 将任意 Date/日期字符串转为北京时区 (UTC+8) 的"伪 UTC" Date，
+ * 之后用 getUTC* 系列读取即为北京时间的字段。
+ * 这样无论运行时所在时区（微信开发者工具常为 UTC），显示都统一按北京时间。
+ */
+function toBeijing(date) {
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return null;
+  return new Date(d.getTime() + 8 * 60 * 60 * 1000);
+}
+
 function formatDate(date, format = 'YYYY-MM-DD') {
   if (!date) return '';
-  
-  const d = new Date(date);
-  if (isNaN(d.getTime())) return '';
-  
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  const hour = String(d.getHours()).padStart(2, '0');
-  const minute = String(d.getMinutes()).padStart(2, '0');
+
+  const d = toBeijing(date);
+  if (!d) return '';
+
+  const year = d.getUTCFullYear();
+  const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(d.getUTCDate()).padStart(2, '0');
+  const hour = String(d.getUTCHours()).padStart(2, '0');
+  const minute = String(d.getUTCMinutes()).padStart(2, '0');
   const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-  const weekDay = weekDays[d.getDay()];
-  
+  const weekDay = weekDays[d.getUTCDay()];
+
   return format
     .replace('YYYY', year)
     .replace('MM', month)
@@ -34,17 +45,17 @@ function formatDate(date, format = 'YYYY-MM-DD') {
 }
 
 /**
- * 格式化时间
+ * 格式化时间（北京时间）
  * @param {string} time - 时间字符串
  * @returns {string}
  */
 function formatTime(time) {
   if (!time) return '';
-  const d = new Date(time);
-  if (isNaN(d.getTime())) return '';
-  
-  const hour = String(d.getHours()).padStart(2, '0');
-  const minute = String(d.getMinutes()).padStart(2, '0');
+  const d = toBeijing(time);
+  if (!d) return '';
+
+  const hour = String(d.getUTCHours()).padStart(2, '0');
+  const minute = String(d.getUTCMinutes()).padStart(2, '0');
   return `${hour}:${minute}`;
 }
 

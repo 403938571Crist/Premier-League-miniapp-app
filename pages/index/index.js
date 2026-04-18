@@ -47,6 +47,7 @@ Page({
     loading: true,
     error: null,
     featuredMatches: [],
+    currentFeatured: 0,
     newsItems: [],
     todayDate: '',
     isCached: false,
@@ -121,6 +122,7 @@ Page({
     this.setData({
       loading: false,
       featuredMatches: this.selectFeaturedMatches(fixturesData?.matches || []),
+      currentFeatured: 0,
       newsItems: newsList,
       newsHasMore: newsList.length >= NEWS_PAGE_SIZE,
       lastLoadedAt: Date.now(),
@@ -273,6 +275,11 @@ Page({
 
   onMatchTap(e) {
     console.log('Match tapped:', e.detail.match);
+  },
+
+  onFeaturedChange(e) {
+    const current = e?.detail?.current ?? 0;
+    this.setData({ currentFeatured: current });
   },
 
   onNewsTap(e) {

@@ -10,19 +10,12 @@
 
   <block wx:else>
     <view class="featured-section" wx:if="{{featuredMatches.length > 0}}">
-      <view class="featured-head">
-        <view class="featured-copy">
-          <text class="featured-eyebrow">MATCHDAY FOCUS</text>
-          <text class="featured-title">焦点比赛</text>
-        </view>
-        <view class="featured-badge">
-          <text>{{featuredMatches.length}} 场</text>
-        </view>
-      </view>
       <view class="featured-shell">
         <swiper
           class="featured-swiper"
-          indicator-dots
+          current="{{currentFeatured}}"
+          bindchange="onFeaturedChange"
+          indicator-dots="{{false}}"
           autoplay="{{false}}"
           circular="{{false}}"
           duration="220">
@@ -36,6 +29,13 @@
             </view>
           </swiper-item>
         </swiper>
+        <view class="featured-pagination" wx:if="{{featuredMatches.length > 1}}">
+          <view
+            wx:for="{{featuredMatches}}"
+            wx:key="id"
+            class="featured-dot {{index === currentFeatured ? 'is-active' : ''}}">
+          </view>
+        </view>
       </view>
     </view>
 

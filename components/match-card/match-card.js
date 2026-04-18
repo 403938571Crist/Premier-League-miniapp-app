@@ -45,12 +45,14 @@ Component({
 
   methods: {
     processMatchData(match) {
-      const date = new Date(match.utcDate);
-      const dateText = `${String(date.getMonth() + 1).padStart(2, '0')}月${String(
-        date.getDate()
+      // 统一按北京时间 (UTC+8) 渲染，避免不同设备/开发者工具时区差异
+      const utc = new Date(match.utcDate);
+      const bj = new Date(utc.getTime() + 8 * 60 * 60 * 1000);
+      const dateText = `${String(bj.getUTCMonth() + 1).padStart(2, '0')}月${String(
+        bj.getUTCDate()
       ).padStart(2, '0')}日`;
-      const time = `${String(date.getHours()).padStart(2, '0')}:${String(
-        date.getMinutes()
+      const time = `${String(bj.getUTCHours()).padStart(2, '0')}:${String(
+        bj.getUTCMinutes()
       ).padStart(2, '0')}`;
       const homeScore = match.score?.fullTime?.home ?? 0;
       const awayScore = match.score?.fullTime?.away ?? 0;

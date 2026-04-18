@@ -1,0 +1,659 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Icon System v2 · 英超小程序</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Noto+Sans+SC:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pl-purple: #38003C;
+    --pl-green: #00FF85;
+    --ink: #1F1F22;
+    --muted: #8E8E93;
+    --bg: #F5F5F7;
+    --line: rgba(0,0,0,.08);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans SC', -apple-system, system-ui, sans-serif;
+    background: #EDEBEE;
+    background-image:
+      radial-gradient(circle at 10% 0%, rgba(56,0,60,.06), transparent 50%),
+      radial-gradient(circle at 90% 100%, rgba(0,255,133,.05), transparent 40%);
+    min-height: 100vh; color: #222; -webkit-font-smoothing: antialiased;
+  }
+  /* All SVG defaults */
+  svg.ic { width: 28px; height: 28px; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+  svg.ic .f { fill: currentColor; stroke: none; }
+
+  .canvas { max-width: 1400px; margin: 0 auto; padding: 44px 40px 120px; }
+  .canvas-head {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 24px; margin-bottom: 36px; padding-bottom: 24px;
+    border-bottom: 1px solid rgba(0,0,0,.08);
+  }
+  .canvas-head h1 {
+    font-family: 'Manrope', sans-serif; font-weight: 800;
+    font-size: 34px; letter-spacing: -.02em; margin: 0 0 6px 0; color: var(--pl-purple);
+  }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--pl-purple); padding: 6px 10px;
+    background: rgba(56,0,60,.08); border-radius: 4px; margin-bottom: 14px;
+  }
+  .canvas-head p { margin: 0; max-width: 720px; color: #444; font-size: 14px; line-height: 1.65; }
+  .canvas-meta {
+    display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #666; letter-spacing: .08em;
+  }
+  section { margin-bottom: 40px; }
+  .sect-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid rgba(0,0,0,.08);
+  }
+  .sect-head h2 {
+    font-family: 'Manrope', sans-serif; font-weight: 800;
+    font-size: 22px; letter-spacing: -.01em; color: var(--ink); margin: 0;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sect-head h2 .num {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600;
+    color: var(--pl-purple); background: var(--pl-green);
+    padding: 3px 7px; border-radius: 3px; letter-spacing: .1em;
+  }
+  .sect-head p { margin: 0; font-size: 13px; color: #666; max-width: 480px; text-align: right; line-height: 1.5; }
+
+  /* Construction card */
+  .grid-demo {
+    background: #fff; border-radius: 14px; padding: 24px;
+    border: 1px solid var(--line);
+    display: grid; grid-template-columns: 320px 1fr; gap: 32px;
+    align-items: center;
+  }
+  @media (max-width: 900px) { .grid-demo { grid-template-columns: 1fr; } }
+  .grid-big {
+    width: 280px; height: 280px; margin: 0 auto; position: relative;
+    background:
+      linear-gradient(to right, rgba(56,0,60,.06) 1px, transparent 1px) 0 0 / 17.5px 100%,
+      linear-gradient(to bottom, rgba(56,0,60,.06) 1px, transparent 1px) 0 0 / 100% 17.5px,
+      linear-gradient(to right, rgba(56,0,60,.15) 1px, transparent 1px) 0 0 / 70px 100%,
+      linear-gradient(to bottom, rgba(56,0,60,.15) 1px, transparent 1px) 0 0 / 100% 70px,
+      #fff;
+    border: 1px solid rgba(56,0,60,.2); border-radius: 4px;
+  }
+  .grid-big::before {
+    content: ''; position: absolute; inset: 23.3px;
+    border: 1px dashed rgba(0,255,133,.7); border-radius: 2px;
+  }
+  .grid-big svg { position: absolute; inset: 0; width: 100%; height: 100%; color: var(--pl-purple); }
+  .grid-specs { font-size: 13px; line-height: 1.75; color: #333; }
+  .grid-specs dl { display: grid; grid-template-columns: 160px 1fr; gap: 8px 18px; margin: 0; }
+  .grid-specs dt { color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .04em; }
+  .grid-specs dd { margin: 0; font-weight: 600; color: var(--ink); }
+
+  /* Icon grid */
+  .iconset {
+    background: #fff; border-radius: 14px; padding: 0;
+    border: 1px solid var(--line); overflow: hidden;
+  }
+  .icon-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+  }
+  .icell {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    padding: 22px 14px 16px; position: relative;
+    border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    transition: background .15s;
+  }
+  .icell:hover { background: #FAFAFA; }
+  .icell .box {
+    width: 56px; height: 56px; border-radius: 12px;
+    background: var(--bg); color: var(--pl-purple);
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s, color .15s;
+  }
+  .icell:hover .box { background: var(--pl-purple); color: var(--pl-green); }
+  .icell .name { font-size: 11.5px; font-weight: 700; color: var(--ink); }
+  .icell .id { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: .04em; }
+
+  /* Tab-bar row */
+  .tabbar-row {
+    background: #fff; border-radius: 14px; padding: 24px;
+    border: 1px solid var(--line); margin-top: 14px;
+    display: grid; grid-template-columns: 320px 1fr; gap: 32px; align-items: center;
+  }
+  @media (max-width: 900px) { .tabbar-row { grid-template-columns: 1fr; } }
+  .tabbar-preview {
+    background: #fff; border-radius: 18px; box-shadow: 0 8px 22px rgba(17,17,19,.08);
+    overflow: hidden; width: 300px; margin: 0 auto;
+  }
+  .tabbar-preview .top { height: 34px; background: var(--pl-purple); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; }
+  .tabbar-preview .stage { height: 180px; background: var(--bg); display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 10px; letter-spacing: .1em; font-family: 'JetBrains Mono', monospace; }
+  .tabbar-preview .bar { height: 62px; display: flex; align-items: center; justify-content: space-around; border-top: 1px solid var(--line); padding-bottom: 6px; background: #fff; }
+  .tab { display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--muted); font-size: 10px; font-weight: 600; }
+  .tab svg { width: 22px; height: 22px; }
+  .tab.on { color: var(--pl-purple); }
+  .tab.on .tick { width: 14px; height: 2px; background: var(--pl-green); border-radius: 1px; margin-top: 2px; }
+  .tabbar-specs h4 { font-family: 'Manrope', sans-serif; margin: 0 0 8px 0; color: var(--pl-purple); font-size: 16px; font-weight: 800; }
+  .tabbar-specs p { margin: 0 0 12px 0; font-size: 12.5px; color: #555; line-height: 1.6; }
+
+  /* Compare strip (before/after) */
+  .compare {
+    background: #fff; border-radius: 14px; padding: 18px; border: 1px solid var(--line);
+    margin-bottom: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+  }
+  .cmp-col { display: flex; align-items: center; gap: 14px; padding: 14px; border-radius: 10px; }
+  .cmp-col.before { background: #FFF3F3; border: 1px solid #FFD4D4; }
+  .cmp-col.after { background: rgba(0,255,133,.08); border: 1px solid rgba(0,255,133,.3); }
+  .cmp-col .lab {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600;
+    letter-spacing: .15em; text-transform: uppercase; padding: 4px 8px; border-radius: 3px; flex-shrink: 0;
+  }
+  .cmp-col.before .lab { background: #C0202A; color: #fff; }
+  .cmp-col.after .lab { background: var(--pl-purple); color: var(--pl-green); }
+  .cmp-col .demo { width: 44px; height: 44px; color: var(--pl-purple); flex-shrink: 0; }
+  .cmp-col .demo svg { width: 100%; height: 100%; }
+  .cmp-col p { margin: 0; font-size: 12px; color: #444; line-height: 1.55; }
+
+  /* Tweaks */
+  .tweaks-panel {
+    position: fixed; bottom: 24px; right: 24px; width: 280px;
+    background: rgba(20,18,24,.96); backdrop-filter: blur(24px);
+    color: #fff; border-radius: 16px; padding: 18px;
+    box-shadow: 0 18px 48px rgba(0,0,0,.3), 0 0 0 1px rgba(255,255,255,.06) inset;
+    z-index: 100; display: none; font-family: 'Manrope', sans-serif;
+  }
+  .tweaks-panel.visible { display: block; }
+  .tweaks-panel h3 { margin: 0 0 4px 0; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .tweaks-panel h3::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--pl-green); box-shadow: 0 0 0 3px rgba(0,255,133,.2); }
+  .tweaks-panel .subt { font-size: 11px; color: rgba(255,255,255,.55); margin-bottom: 14px; }
+  .tweaks-group { margin-bottom: 14px; }
+  .tweaks-group:last-child { margin-bottom: 0; }
+  .tweaks-group .label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .12em; color: rgba(255,255,255,.5); margin-bottom: 8px; }
+  .tweaks-segment { display: flex; background: rgba(255,255,255,.06); padding: 3px; border-radius: 8px; gap: 2px; }
+  .tweaks-segment button { flex: 1; border: 0; background: transparent; color: rgba(255,255,255,.7); font-size: 11px; font-weight: 600; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-family: inherit; }
+  .tweaks-segment button.active { background: var(--pl-green); color: var(--pl-purple); }
+</style>
+</head>
+<body>
+
+<div class="canvas">
+
+  <div class="canvas-head">
+    <div>
+      <div class="eyebrow">Design System · Icon Set · v2 Refined</div>
+      <h1>Icon System — 英超小程序</h1>
+      <p>Rewritten from scratch. Tighter geometry on a 24u grid with 2u safe area, sub-pixel-aligned junctions, 1.6u stroke (finer than v1's chunky 1.75), proper football-specific detail (jersey V-neck + sleeve seams, trophy with real handles, whistle with lanyard hole). Every icon uses <strong>currentColor</strong>.</p>
+    </div>
+    <div class="canvas-meta">
+      <span>04 / 18 / 2026 · v2</span>
+      <span>PAGE · /icons</span>
+      <span>COMPONENT · .pl-icon</span>
+    </div>
+  </div>
+
+  <!-- Before/after -->
+  <section>
+    <div class="sect-head"><h2><span class="num">00</span>v1 → v2 Refinement</h2><p>A representative comparison. Same idea, refined execution.</p></div>
+    <div class="compare">
+      <div class="cmp-col before">
+        <span class="lab">v1</span>
+        <div class="demo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l4-3h8l4 3-2 4-3-1v10H7V10L4 11z"/></svg></div>
+        <p>Single outline reads like a T-shirt. No collar. No number panel. Sleeves look glued on.</p>
+      </div>
+      <div class="cmp-col after">
+        <span class="lab">v2</span>
+        <div class="demo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7.5 8 4h2.5a2 2 0 0 0 3 0H16l4 3.5-1.8 3.5-2.2-.8V20H8v-9.8l-2.2.8z"/><path d="M10.5 4c0 1.3 .7 2 1.5 2s1.5-.7 1.5-2"/><path d="M11 13h2"/><path d="M11 16h2"/></svg></div>
+        <p>V-neck defined, sleeves taper inward, small hem detail, and a two-line number placeholder. Reads as a football kit.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Construction -->
+  <section>
+    <div class="sect-head"><h2><span class="num">01</span>Construction</h2><p>24u frame, 20u safe area, 1.6u stroke. Keylines snap to half-units for sharp rendering.</p></div>
+    <div class="grid-demo">
+      <div class="grid-big">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3.5 11.5 12 4l8.5 7.5"/>
+          <path d="M5.5 10.2V19a1.2 1.2 0 0 0 1.2 1.2H10V14.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5.7h3.3A1.2 1.2 0 0 0 18.5 19v-8.8"/>
+          <path d="M15.5 6.3V4.8a.4.4 0 0 1 .4-.4h1.2a.4.4 0 0 1 .4.4v3.1"/>
+        </svg>
+      </div>
+      <div class="grid-specs">
+        <dl>
+          <dt>Artboard</dt><dd>24 × 24 units</dd>
+          <dt>Safe area</dt><dd>20 × 20 units (2u padding, green dash)</dd>
+          <dt>Stroke</dt><dd>1.6u · round cap · round join</dd>
+          <dt>Minor grid</dt><dd>1u (light)</dd>
+          <dt>Major grid</dt><dd>4u (dark)</dd>
+          <dt>Corner radius</dt><dd>2u on body, 0.4–1u on small details</dd>
+          <dt>Color</dt><dd>currentColor — inherits from parent</dd>
+          <dt>Default sizes</dt><dd>16 / 20 / 24 / 32 px</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- NAVIGATION -->
+  <section>
+    <div class="sect-head"><h2><span class="num">02</span>Navigation</h2><p>Tab-bar glyphs. Outline by default, filled when active.</p></div>
+    <div class="iconset"><div class="icon-grid">
+
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <path d="M3.5 11.5 12 4l8.5 7.5"/>
+        <path d="M5.5 10.2V19a1.2 1.2 0 0 0 1.2 1.2H10V14.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5.7h3.3A1.2 1.2 0 0 0 18.5 19v-8.8"/>
+        <path d="M15.5 6.3V4.8a.4.4 0 0 1 .4-.4h1.2a.4.4 0 0 1 .4.4v3.1"/>
+      </svg></div><div class="name">首页</div><div class="id">nav/home</div></div>
+
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <rect x="3.5" y="13" width="4" height="7.5" rx="1"/>
+        <rect x="10" y="8" width="4" height="12.5" rx="1"/>
+        <rect x="16.5" y="4" width="4" height="16.5" rx="1"/>
+      </svg></div><div class="name">积分榜</div><div class="id">nav/table</div></div>
+
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <rect x="3.5" y="5.5" width="17" height="15" rx="2"/>
+        <path d="M3.5 10h17"/>
+        <path d="M8 3.5v4"/>
+        <path d="M16 3.5v4"/>
+        <circle cx="8" cy="14" r=".8" class="f"/>
+        <circle cx="12" cy="14" r=".8" class="f"/>
+        <circle cx="16" cy="14" r=".8" class="f"/>
+      </svg></div><div class="name">赛程</div><div class="id">nav/schedule</div></div>
+
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <circle cx="12" cy="8" r="3.6"/>
+        <path d="M4.5 20.5c.5-3.8 3.7-6.5 7.5-6.5s7 2.7 7.5 6.5"/>
+      </svg></div><div class="name">我的</div><div class="id">nav/profile</div></div>
+
+    </div></div>
+
+    <div class="tabbar-row">
+      <div class="tabbar-preview">
+        <div class="top">英超小程序</div>
+        <div class="stage">CONTENT STAGE</div>
+        <div class="bar">
+          <div class="tab on">
+            <svg viewBox="0 0 24 24"><path class="f" d="M3.5 11.5 12 4l8.5 7.5v8.4a1.2 1.2 0 0 1-1.2 1.2H14.2V14.8a1 1 0 0 0-1-1h-2.4a1 1 0 0 0-1 1v6.3H4.7a1.2 1.2 0 0 1-1.2-1.2z" fill="currentColor"/></svg>
+            <span>首页</span><span class="tick"></span>
+          </div>
+          <div class="tab">
+            <svg class="ic" viewBox="0 0 24 24">
+              <rect x="3.5" y="13" width="4" height="7.5" rx="1"/>
+              <rect x="10" y="8" width="4" height="12.5" rx="1"/>
+              <rect x="16.5" y="4" width="4" height="16.5" rx="1"/>
+            </svg>
+            <span>积分榜</span>
+          </div>
+          <div class="tab">
+            <svg class="ic" viewBox="0 0 24 24">
+              <rect x="3.5" y="5.5" width="17" height="15" rx="2"/>
+              <path d="M3.5 10h17"/><path d="M8 3.5v4"/><path d="M16 3.5v4"/>
+            </svg>
+            <span>赛程</span>
+          </div>
+          <div class="tab">
+            <svg class="ic" viewBox="0 0 24 24">
+              <circle cx="12" cy="8" r="3.6"/>
+              <path d="M4.5 20.5c.5-3.8 3.7-6.5 7.5-6.5s7 2.7 7.5 6.5"/>
+            </svg>
+            <span>我的</span>
+          </div>
+        </div>
+      </div>
+      <div class="tabbar-specs">
+        <h4>Active = filled + green tick</h4>
+        <p>Selected tab uses the solid-fill variant of the same glyph. A 14×2px green underline sits 2px below the label. Inactive tabs stay outline at muted grey — no color flash.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTBALL -->
+  <section>
+    <div class="sect-head"><h2><span class="num">03</span>Football · 足球专属</h2><p>Redrawn with domain-correct proportions.</p></div>
+    <div class="iconset"><div class="icon-grid">
+
+      <!-- Ball -->
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="8.5"/>
+        <path d="M12 7.3l3.5 2.6-1.3 4.1h-4.4L8.5 9.9z"/>
+        <path d="M12 7.3V3.5"/>
+        <path d="M15.5 9.9l3.6-1.2"/>
+        <path d="M14.2 14l2.2 3"/>
+        <path d="M9.8 14l-2.2 3"/>
+        <path d="M8.5 9.9 4.9 8.7"/>
+      </svg></div><div class="name">足球</div><div class="id">fb/ball</div></div>
+
+      <!-- Trophy -->
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <path d="M7 3.5h10v5.2a5 5 0 0 1-10 0z"/>
+        <path d="M7 5.5H4v2.2a3 3 0 0 0 3 3"/>
+        <path d="M17 5.5h3v2.2a3 3 0 0 1-3 3"/>
+        <path d="M10 13.8v2.4h4v-2.4"/>
+        <path d="M8.5 20.5h7"/>
+        <path d="M8.5 20.5v-2.2a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v2.2"/>
+      </svg></div><div class="name">奖杯</div><div class="id">fb/trophy</div></div>
+
+      <!-- Whistle -->
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <path d="M9 9h10.5a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H15.5"/>
+        <path d="M18 9V6.5a1 1 0 0 0-1.4-.9l-4.6 2"/>
+        <path d="M9 9a5.5 5.5 0 1 0 3.8 9.6A5.5 5.5 0 0 0 9 9z"/>
+        <circle cx="9.5" cy="14.5" r="1"/>
+      </svg></div><div class="name">哨声</div><div class="id">fb/whistle</div></div>
+
+      <!-- Jersey -->
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <path d="M4 7.5 8 4h2.5a2 2 0 0 0 3 0H16l4 3.5-1.8 3.5-2.2-.8V20H8v-9.8l-2.2.8z"/>
+        <path d="M10.5 4c0 1.3 .7 2 1.5 2s1.5-.7 1.5-2"/>
+        <path d="M11 13h2"/>
+        <path d="M11 16h2"/>
+      </svg></div><div class="name">球衣</div><div class="id">fb/jersey</div></div>
+
+      <!-- Shield / Club -->
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <path d="M12 3.5 4.5 5.5v6.3c0 4.4 3 8.2 7.5 9.2 4.5-1 7.5-4.8 7.5-9.2V5.5z"/>
+        <path d="M9 12l2.3 2.3L15.5 10"/>
+      </svg></div><div class="name">俱乐部</div><div class="id">fb/club</div></div>
+
+      <!-- Boot -->
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <path d="M3.5 17.5V10a1 1 0 0 1 1-1h3.8l2.2 2.8h7.3a3.7 3.7 0 0 1 3.7 3.7v1a2 2 0 0 1-2 2H5.5a2 2 0 0 1-2-2z"/>
+        <path d="M7 9.5V7.5"/>
+        <path d="M10.5 9.5V5"/>
+        <circle cx="6" cy="17" r=".6" class="f"/>
+        <circle cx="9" cy="17" r=".6" class="f"/>
+        <circle cx="12" cy="17" r=".6" class="f"/>
+        <circle cx="15" cy="17" r=".6" class="f"/>
+        <circle cx="18" cy="17" r=".6" class="f"/>
+      </svg></div><div class="name">球鞋</div><div class="id">fb/boot</div></div>
+
+      <!-- Pitch -->
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <rect x="3" y="5.5" width="18" height="13" rx="1.5"/>
+        <path d="M12 5.5v13"/>
+        <circle cx="12" cy="12" r="2.3"/>
+        <path d="M3 9v6"/>
+        <path d="M21 9v6"/>
+        <path d="M3 10.5h2v3H3"/>
+        <path d="M21 10.5h-2v3h2"/>
+      </svg></div><div class="name">球场</div><div class="id">fb/pitch</div></div>
+
+      <!-- Goal -->
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <path d="M3 9h18v10H3z"/>
+        <path d="M3 9l1.8 2V19"/>
+        <path d="M21 9l-1.8 2V19"/>
+        <path d="M4.8 14h14.4"/>
+        <path d="M8.5 11v8"/>
+        <path d="M15.5 11v8"/>
+        <path d="M6 6.5c1.5-1.5 3.7-2 6-2s4.5 .5 6 2"/>
+      </svg></div><div class="name">球门</div><div class="id">fb/goal</div></div>
+
+      <!-- Player -->
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <circle cx="12" cy="5" r="2.3"/>
+        <path d="M9 8l-2.5 4L9 13.5V20"/>
+        <path d="M15 8l2.5 4L15 13.5V20"/>
+        <path d="M9 13.5h6"/>
+        <path d="M10.5 20h3"/>
+      </svg></div><div class="name">球员</div><div class="id">fb/player</div></div>
+
+      <!-- Cards -->
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <rect x="4.5" y="3.5" width="10" height="14" rx="1" transform="rotate(-8 9.5 10.5)"/>
+        <rect x="9.5" y="6.5" width="10" height="14" rx="1" transform="rotate(8 14.5 13.5)"/>
+      </svg></div><div class="name">出牌</div><div class="id">fb/card</div></div>
+
+      <!-- Sub -->
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <path d="M4 8h14"/>
+        <path d="M14 4l4 4-4 4"/>
+        <path d="M20 16H6"/>
+        <path d="M10 12l-4 4 4 4"/>
+      </svg></div><div class="name">换人</div><div class="id">fb/sub</div></div>
+
+      <!-- Flag -->
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <path d="M6.5 20.5V3.5"/>
+        <path d="M6.5 4.5h10.2a.6.6 0 0 1 .5 1L14.5 9l2.7 3.5a.6.6 0 0 1-.5 1H6.5"/>
+      </svg></div><div class="name">角旗</div><div class="id">fb/flag</div></div>
+
+    </div></div>
+  </section>
+
+  <!-- CONTENT -->
+  <section>
+    <div class="sect-head"><h2><span class="num">04</span>Content · 内容</h2><p>Media types, saves, share, reactions.</p></div>
+    <div class="iconset"><div class="icon-grid">
+
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <path d="M5.5 3.5h9.2L19 7.8V19a1.5 1.5 0 0 1-1.5 1.5h-12A1.5 1.5 0 0 1 4 19V5a1.5 1.5 0 0 1 1.5-1.5z"/>
+        <path d="M14.5 3.5V8h4.5"/>
+        <path d="M8 12h7"/><path d="M8 15h7"/><path d="M8 18h4"/>
+      </svg></div><div class="name">文章</div><div class="id">ct/article</div></div>
+
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <rect x="3" y="5.5" width="18" height="13" rx="2"/>
+        <path class="f" d="M10.2 9.3v5.4a.5.5 0 0 0 .76.42l4.3-2.7a.5.5 0 0 0 0-.84l-4.3-2.7a.5.5 0 0 0-.76.42z"/>
+      </svg></div><div class="name">视频</div><div class="id">ct/video</div></div>
+
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <rect x="3" y="5.5" width="18" height="13" rx="2"/>
+        <circle cx="8.5" cy="10.5" r="1.5"/>
+        <path d="M21 16.5 16 11.5l-7.5 7"/>
+      </svg></div><div class="name">图集</div><div class="id">ct/gallery</div></div>
+
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <path d="M6 3.5h12a.5.5 0 0 1 .5.5v16.2a.3.3 0 0 1-.48.24L12 16.5l-6.02 3.94A.3.3 0 0 1 5.5 20.2V4a.5.5 0 0 1 .5-.5z"/>
+      </svg></div><div class="name">收藏</div><div class="id">ct/bookmark</div></div>
+
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <path d="M12 20.5 4.3 13a4.6 4.6 0 0 1 6.5-6.5l1.2 1.2 1.2-1.2a4.6 4.6 0 0 1 6.5 6.5z"/>
+      </svg></div><div class="name">喜欢</div><div class="id">ct/like</div></div>
+
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <path d="M20.5 11.5c0 3.6-3.8 6.5-8.5 6.5-1.2 0-2.4-.2-3.4-.6L4 19.5l1.4-3.8C4 14.6 3.5 13.1 3.5 11.5 3.5 7.9 7.3 5 12 5s8.5 2.9 8.5 6.5z"/>
+        <circle cx="8.5" cy="11.5" r=".8" class="f"/>
+        <circle cx="12" cy="11.5" r=".8" class="f"/>
+        <circle cx="15.5" cy="11.5" r=".8" class="f"/>
+      </svg></div><div class="name">评论</div><div class="id">ct/comment</div></div>
+
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <circle cx="18" cy="5.5" r="2.3"/>
+        <circle cx="6" cy="12" r="2.3"/>
+        <circle cx="18" cy="18.5" r="2.3"/>
+        <path d="M7.9 13.2l8.2 4.1"/>
+        <path d="M16.1 6.7 7.9 10.8"/>
+      </svg></div><div class="name">分享</div><div class="id">ct/share</div></div>
+
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <path d="M10.5 13.5a4 4 0 0 0 5.7 0l3.3-3.3a4 4 0 0 0-5.7-5.7l-1.2 1.2"/>
+        <path d="M13.5 10.5a4 4 0 0 0-5.7 0l-3.3 3.3a4 4 0 0 0 5.7 5.7l1.2-1.2"/>
+      </svg></div><div class="name">链接</div><div class="id">ct/link</div></div>
+
+    </div></div>
+  </section>
+
+  <!-- ACTIONS -->
+  <section>
+    <div class="sect-head"><h2><span class="num">05</span>Actions · 操作</h2><p>Verbs — headers, sheets, list rows.</p></div>
+    <div class="iconset"><div class="icon-grid">
+
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="6.5"/>
+        <path d="M15.8 15.8 20 20"/>
+      </svg></div><div class="name">搜索</div><div class="id">ac/search</div></div>
+
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <path d="M4 6.5h16"/><path d="M7 12h10"/><path d="M10 17.5h4"/>
+        <circle cx="16" cy="6.5" r="1.5" fill="#fff"/>
+        <circle cx="9" cy="12" r="1.5" fill="#fff"/>
+        <circle cx="14" cy="17.5" r="1.5" fill="#fff"/>
+      </svg></div><div class="name">筛选</div><div class="id">ac/filter</div></div>
+
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <path d="M14.5 5.5 8 12l6.5 6.5"/>
+      </svg></div><div class="name">返回</div><div class="id">ac/back</div></div>
+
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <path d="M9.5 5.5 16 12l-6.5 6.5"/>
+      </svg></div><div class="name">下一步</div><div class="id">ac/next</div></div>
+
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <path d="M6 6l12 12"/><path d="M18 6 6 18"/>
+      </svg></div><div class="name">关闭</div><div class="id">ac/close</div></div>
+
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <path d="M12 5v14"/><path d="M5 12h14"/>
+      </svg></div><div class="name">添加</div><div class="id">ac/add</div></div>
+
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <path d="M3.5 4.5v5.3h5.3"/>
+        <path d="M4 9.8A8 8 0 1 1 4 14.2"/>
+      </svg></div><div class="name">刷新</div><div class="id">ac/refresh</div></div>
+
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <circle cx="6" cy="12" r="1.5" class="f"/>
+        <circle cx="12" cy="12" r="1.5" class="f"/>
+        <circle cx="18" cy="12" r="1.5" class="f"/>
+      </svg></div><div class="name">更多</div><div class="id">ac/more</div></div>
+
+    </div></div>
+  </section>
+
+  <!-- SYSTEM -->
+  <section>
+    <div class="sect-head"><h2><span class="num">06</span>System · 系统</h2><p>Feedback + utilities. Consistent circular containers.</p></div>
+    <div class="iconset"><div class="icon-grid">
+
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="8.5"/>
+        <path d="M8 12.3 10.8 15.2 16.2 9.5"/>
+      </svg></div><div class="name">成功</div><div class="id">sys/success</div></div>
+
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <path d="M12 3.5 21.4 19.7a1 1 0 0 1-.87 1.5H3.47a1 1 0 0 1-.87-1.5z"/>
+        <path d="M12 10v4.5"/>
+        <circle cx="12" cy="17.5" r=".7" class="f"/>
+      </svg></div><div class="name">警告</div><div class="id">sys/warn</div></div>
+
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="8.5"/>
+        <path d="M12 8v4.5"/>
+        <circle cx="12" cy="15.5" r=".7" class="f"/>
+      </svg></div><div class="name">错误</div><div class="id">sys/error</div></div>
+
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="8.5"/>
+        <path d="M12 11v5.5"/>
+        <circle cx="12" cy="8" r=".7" class="f"/>
+      </svg></div><div class="name">提示</div><div class="id">sys/info</div></div>
+
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <path d="M17.5 16v-4.5a5.5 5.5 0 1 0-11 0V16l-1.8 2.2a.5.5 0 0 0 .4.8h13.8a.5.5 0 0 0 .4-.8z"/>
+        <path d="M10 21a2 2 0 0 0 4 0"/>
+      </svg></div><div class="name">通知</div><div class="id">sys/bell</div></div>
+
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="8.5"/>
+        <path d="M12 7.5V12l3 2"/>
+      </svg></div><div class="name">时间</div><div class="id">sys/time</div></div>
+
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <path d="M12 3.5c3.6 0 6.5 2.8 6.5 6.3 0 4.8-6.5 10.7-6.5 10.7S5.5 14.6 5.5 9.8c0-3.5 2.9-6.3 6.5-6.3z"/>
+        <circle cx="12" cy="10" r="2.3"/>
+      </svg></div><div class="name">位置</div><div class="id">sys/pin</div></div>
+
+      <div class="icell"><div class="box"><svg class="ic" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="2.7"/>
+        <path d="M19.5 12a7.5 7.5 0 0 0-.2-1.6l1.9-1.4-1.9-3.3-2.2 1a7.5 7.5 0 0 0-2.8-1.6l-.4-2.4h-3.8l-.4 2.4a7.5 7.5 0 0 0-2.8 1.6l-2.2-1-1.9 3.3 1.9 1.4a7.5 7.5 0 0 0 0 3.2l-1.9 1.4 1.9 3.3 2.2-1a7.5 7.5 0 0 0 2.8 1.6l.4 2.4h3.8l.4-2.4a7.5 7.5 0 0 0 2.8-1.6l2.2 1 1.9-3.3-1.9-1.4a7.5 7.5 0 0 0 .2-1.6z"/>
+      </svg></div><div class="name">设置</div><div class="id">sys/settings</div></div>
+
+    </div></div>
+  </section>
+
+</div>
+
+<div class="tweaks-panel" id="tweaks">
+  <h3>Tweaks</h3>
+  <div class="subt">Tune global stroke / corners / accent.</div>
+  <div class="tweaks-group">
+    <div class="label">Stroke weight</div>
+    <div class="tweaks-segment" id="stroke-seg">
+      <button data-stroke="1.35">Thin</button>
+      <button data-stroke="1.6" class="active">Regular</button>
+      <button data-stroke="2">Bold</button>
+    </div>
+  </div>
+  <div class="tweaks-group">
+    <div class="label">Corner style</div>
+    <div class="tweaks-segment" id="cap-seg">
+      <button data-cap="round" class="active">Round</button>
+      <button data-cap="square">Square</button>
+    </div>
+  </div>
+  <div class="tweaks-group">
+    <div class="label">Accent</div>
+    <div class="tweaks-segment" id="accent-seg">
+      <button data-accent="pl" class="active">PL</button>
+      <button data-accent="lime">Lime</button>
+      <button data-accent="coral">Coral</button>
+      <button data-accent="gold">Gold</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const TWEAK_DEFAULTS = {"stroke":"1.6","cap":"round","accent":"pl"};
+  const state = { ...TWEAK_DEFAULTS };
+  const panel = document.getElementById('tweaks');
+  function applyStroke(w) {
+    document.querySelectorAll('svg.ic').forEach(s => s.setAttribute('stroke-width', w));
+    document.querySelectorAll('#stroke-seg button').forEach(b => b.classList.toggle('active', b.dataset.stroke === String(w)));
+  }
+  function applyCap(c) {
+    document.querySelectorAll('svg.ic').forEach(s => {
+      s.setAttribute('stroke-linecap', c);
+      s.setAttribute('stroke-linejoin', c === 'round' ? 'round' : 'miter');
+    });
+    document.querySelectorAll('#cap-seg button').forEach(b => b.classList.toggle('active', b.dataset.cap === c));
+  }
+  function applyAccent(a) {
+    const map = {
+      pl:    { g: '#00FF85', p: '#38003C' },
+      lime:  { g: '#E8FF3A', p: '#0A0F1E' },
+      coral: { g: '#FF6B3D', p: '#1A1A1A' },
+      gold:  { g: '#F5C542', p: '#1A3D2E' }
+    };
+    const m = map[a] || map.pl;
+    document.documentElement.style.setProperty('--pl-green', m.g);
+    document.documentElement.style.setProperty('--pl-purple', m.p);
+    document.querySelectorAll('#accent-seg button').forEach(b => b.classList.toggle('active', b.dataset.accent === a));
+  }
+  document.getElementById('stroke-seg').addEventListener('click', e => {
+    const b = e.target.closest('button[data-stroke]'); if (!b) return;
+    state.stroke = b.dataset.stroke; applyStroke(state.stroke);
+  });
+  document.getElementById('cap-seg').addEventListener('click', e => {
+    const b = e.target.closest('button[data-cap]'); if (!b) return;
+    state.cap = b.dataset.cap; applyCap(state.cap);
+  });
+  document.getElementById('accent-seg').addEventListener('click', e => {
+    const b = e.target.closest('button[data-accent]'); if (!b) return;
+    state.accent = b.dataset.accent; applyAccent(state.accent);
+  });
+  // Show tweaks panel when '?' key is pressed
+  document.addEventListener('keydown', e => {
+    if (e.key === '?') panel.classList.toggle('visible');
+  });
+  applyStroke(state.stroke); applyCap(state.cap); applyAccent(state.accent);
+</script>
+</body>
+</html>

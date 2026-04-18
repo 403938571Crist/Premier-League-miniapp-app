@@ -1,84 +1,95 @@
 <loading-state wx:if="{{loading}}"></loading-state>
 
-<view class="container" wx:elif="{{!notFound && article}}">
+<view class="page" wx:elif="{{!notFound && article}}">
   <view class="hero hero-{{article.coverTheme}}">
-    <view class="hero-top">
-      <view class="hero-chip" style="background-color: {{article.coverAccent}};">
-        <text class="hero-chip-text">{{article.coverLabel}}</text>
+    <image
+      wx:if="{{article.hasImage}}"
+      class="hero-img"
+      src="{{article.coverImage}}"
+      mode="aspectFill"
+    />
+    <view class="hero-scribble"></view>
+    <view class="hero-shade"></view>
+
+    <view class="hero-chip" style="background-color: {{article.coverAccent}};">
+      <view class="hero-chip-dot"></view>
+      <text class="hero-chip-text">{{article.coverLabel}}</text>
+    </view>
+
+    <view class="hero-overlay">
+      <view class="hero-meta">
+        <text class="hero-meta-text">{{sourceLabel}}</text>
+        <view class="hero-meta-dot"></view>
+        <text class="hero-meta-text">{{article.publishedAt}}</text>
       </view>
-      <text class="hero-date">{{article.publishedAt}}</text>
-    </view>
-
-    <view class="hero-copy">
-      <text class="hero-source">{{sourceLabel}}</text>
       <text class="hero-title">{{article.title}}</text>
-      <text class="hero-summary">{{article.summary}}</text>
     </view>
   </view>
 
-  <view class="meta-card">
-    <view class="meta-row">
-      <text class="meta-label">来源</text>
-      <text class="meta-value">{{article.source}}</text>
+  <view class="content">
+    <view class="lede" wx:if="{{article.showLede}}">
+      <text>{{article.lede}}</text>
     </view>
-    <view class="meta-row">
-      <text class="meta-label">类型</text>
-      <text class="meta-value">{{article.mediaType}}</text>
-    </view>
-    <view class="meta-row">
-      <text class="meta-label">作者</text>
-      <text class="meta-value">{{article.author}}</text>
-    </view>
-  </view>
 
-  <view class="article-card">
     <view class="article-note" wx:if="{{article.sourceNote}}">
       <text>{{article.sourceNote}}</text>
     </view>
 
-    <!-- 有结构化正文 -->
-    <block wx:if="{{article.blocks.length > 0}}">
+    <view class="body" wx:if="{{article.blocks.length > 0}}">
       <block wx:for="{{article.blocks}}" wx:key="index">
-        <view class="article-block" wx:if="{{item.type === 'paragraph'}}">
-          <text class="article-paragraph">{{item.text}}</text>
+        <view class="body-p" wx:if="{{item.type === 'paragraph'}}">
+          <text>{{item.text}}</text>
         </view>
-        <view class="article-block quote-block" wx:elif="{{item.type === 'quote'}}">
-          <text class="article-quote">{{item.text}}</text>
+        <view class="body-quote" wx:elif="{{item.type === 'quote'}}">
+          <text>{{item.text}}</text>
         </view>
-        <view class="article-block" wx:elif="{{item.type === 'bullet'}}">
-          <view class="bullet-item" wx:for="{{item.items}}" wx:key="index">
-            <view class="bullet-dot"></view>
-            <text class="bullet-text">{{item}}</text>
+        <view class="body-bullets" wx:elif="{{item.type === 'bullet'}}">
+          <view class="body-bullet" wx:for="{{item.items}}" wx:for-item="bullet" wx:key="index">
+            <view class="body-bullet-dot"></view>
+            <text class="body-bullet-text">{{bullet}}</text>
           </view>
         </view>
-        <view class="article-block article-image-block" wx:elif="{{item.type === 'image'}}">
-          <image class="article-image" src="{{item.text}}" mode="widthFix" lazy-load></image>
+        <view class="body-image" wx:elif="{{item.type === 'image'}}">
+          <image class="body-img" src="{{item.text}}" mode="widthFix" lazy-load></image>
         </view>
       </block>
-    </block>
-
-    <!-- 有摘要但无正文 -->
-    <view wx:elif="{{article.summary}}">
-      <text class="article-paragraph">{{article.summary}}</text>
     </view>
 
-    <!-- 无内容提示 -->
-    <view wx:else class="no-content-tip">
+    <view class="body no-content" wx:elif="{{!article.showLede}}">
       <text class="no-content-text">点击下方按钮查看完整文章</text>
     </view>
-  </view>
 
-  <view class="action-row">
-    <view class="action-btn action-btn-primary" bindtap="onOpenWebview" wx:if="{{article.url}}">
-      <text>查看完整文章</text>
+    <view class="meta-row">
+      <view class="tag">
+        <text class="tag-k">来源</text>
+        <text class="tag-v">{{article.source}}</text>
+      </view>
+      <view class="tag">
+        <text class="tag-k">类型</text>
+        <text class="tag-v">{{article.mediaTypeLabel}}</text>
+      </view>
+      <view class="tag" wx:if="{{article.author}}">
+        <text class="tag-k">作者</text>
+        <text class="tag-v">{{article.author}}</text>
+      </view>
     </view>
-    <view class="action-btn action-btn-secondary" bindtap="onCopyLink" wx:if="{{article.url}}">
-      <text>复制原文链接</text>
+
+    <view class="actions" wx:if="{{article.url}}">
+      <view class="btn-primary" bindtap="onOpenWebview">
+        <text class="btn-primary-text">查看完整文章</text>
+        <text class="btn-primary-chev">›</text>
+      </view>
+      <view class="btn-icon" bindtap="onCopyLink" hover-class="btn-icon-hover">
+        <pl-icon name="ct/link" size="{{32}}" color="#38003C"></pl-icon>
+      </view>
+      <view class="btn-icon" bindtap="onShare" hover-class="btn-icon-hover">
+        <pl-icon name="ct/share" size="{{32}}" color="#38003C"></pl-icon>
+      </view>
     </view>
   </view>
 </view>
 
-<view class="container" wx:else>
+<view class="page" wx:else>
   <empty-state
     title="资讯不存在"
     description="当前资讯详情未找到"

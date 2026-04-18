@@ -53,10 +53,10 @@ const ICONS = {
   'sys/settings': `<circle cx="12" cy="12" r="2.7"/><path d="M19.5 12a7.5 7.5 0 0 0-.2-1.6l1.9-1.4-1.9-3.3-2.2 1a7.5 7.5 0 0 0-2.8-1.6l-.4-2.4h-3.8l-.4 2.4a7.5 7.5 0 0 0-2.8 1.6l-2.2-1-1.9 3.3 1.9 1.4a7.5 7.5 0 0 0 0 3.2l-1.9 1.4 1.9 3.3 2.2-1a7.5 7.5 0 0 0 2.8 1.6l.4 2.4h3.8l.4-2.4a7.5 7.5 0 0 0 2.8-1.6l2.2 1 1.9-3.3-1.9-1.4a7.5 7.5 0 0 0 .2-1.6z"/>`,
 };
 
-function makeSvgDataUri(paths, color, strokeWidth) {
-  const c = encodeURIComponent(color);
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
-  return 'data:image/svg+xml,' + encodeURIComponent(svg).replace(/%20/g, ' ');
+function makeSvgDataUri(paths, color, strokeWidth, size) {
+  const s = size || 24;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${color}" color="${color}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
 }
 
 Component({
@@ -70,7 +70,7 @@ Component({
     src() {
       const paths = ICONS[this.data.name] || '';
       if (!paths) return '';
-      return makeSvgDataUri(paths, this.data.color, this.data.strokeWidth);
+      return makeSvgDataUri(paths, this.data.color, this.data.strokeWidth, this.data.size);
     },
   },
   data: {
@@ -80,14 +80,14 @@ Component({
     'name, color, size, strokeWidth'() {
       const paths = ICONS[this.data.name] || '';
       if (!paths) { this.setData({ src: '' }); return; }
-      this.setData({ src: makeSvgDataUri(paths, this.data.color, this.data.strokeWidth) });
+      this.setData({ src: makeSvgDataUri(paths, this.data.color, this.data.strokeWidth, this.data.size) });
     },
   },
   lifetimes: {
     attached() {
       const paths = ICONS[this.data.name] || '';
       if (!paths) return;
-      this.setData({ src: makeSvgDataUri(paths, this.data.color, this.data.strokeWidth) });
+      this.setData({ src: makeSvgDataUri(paths, this.data.color, this.data.strokeWidth, this.data.size) });
     },
   },
 });

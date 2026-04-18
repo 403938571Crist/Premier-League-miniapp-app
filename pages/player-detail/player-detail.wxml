@@ -27,7 +27,9 @@
     <!-- 基本信息 -->
     <view class="card">
       <view class="card-title">
-        <image class="card-title-icon" src="/images/icons/info-card.png" mode="aspectFit"></image>
+        <view class="card-title-icon">
+          <pl-icon name="sys/info" size="20" color="#38003C"></pl-icon>
+        </view>
         <text>基本信息</text>
       </view>
       <view class="info-list">
@@ -57,7 +59,9 @@
     <!-- 赛季数据 -->
     <view class="card" wx:if="{{playerStats.appearances > 0}}">
       <view class="card-title">
-        <image class="card-title-icon" src="/images/icons/chart.png" mode="aspectFit"></image>
+        <view class="card-title-icon">
+          <pl-icon name="nav/table" size="20" color="#38003C"></pl-icon>
+        </view>
         <text>本赛季数据</text>
       </view>
       
@@ -97,7 +101,9 @@
 
     <!-- 数据说明 -->
     <view class="data-note">
-      <image class="data-note-icon" src="/images/icons/warning.png" mode="aspectFit"></image>
+      <view class="data-note-icon">
+        <pl-icon name="sys/warn" size="20" color="#FF9800"></pl-icon>
+      </view>
       <text>数据由后端 /api 聚合返回，可能存在短暂缓存延迟</text>
     </view>
   </block>

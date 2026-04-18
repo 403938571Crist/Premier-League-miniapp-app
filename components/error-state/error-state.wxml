@@ -1,5 +1,7 @@
 <view class="error-state">
-  <view class="error-icon">⚠️</view>
+  <view class="error-icon">
+    <pl-icon name="sys/warn" size="42" color="#38003C"></pl-icon>
+  </view>
   <text class="error-title">{{title}}</text>
   <text class="error-desc" wx:if="{{description}}">{{description}}</text>
   <view class="error-action" bindtap="onRetry" wx:if="{{showRetry}}">

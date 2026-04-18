@@ -1,4 +1,6 @@
 {
   "navigationBarTitleText": "搜索",
-  "usingComponents": {}
+  "usingComponents": {
+    "pl-icon": "../../components/icon/index"
+  }
 }

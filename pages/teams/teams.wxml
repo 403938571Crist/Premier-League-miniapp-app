@@ -29,7 +29,9 @@
           <text class="points-value">{{item.points}}</text>
           <text class="points-label">分</text>
         </view>
-        <image class="arrow-icon" src="/images/icons/arrow-right.png" mode="aspectFit"></image>
+        <view class="arrow-icon">
+          <pl-icon name="ac/next" size="16" color="#A0A0A8"></pl-icon>
+        </view>
       </view>
     </view>
 

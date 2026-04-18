@@ -1,4 +1,6 @@
 {
   "component": true,
-  "usingComponents": {}
+  "usingComponents": {
+    "pl-icon": "/components/icon/index"
+  }
 }

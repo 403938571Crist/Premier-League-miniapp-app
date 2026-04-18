@@ -18,6 +18,9 @@
   height: 36rpx;
   opacity: 0.4;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .search-input {
@@ -39,11 +42,6 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-}
-
-.clear-icon {
-  font-size: 24rpx;
-  color: #AAAAAA;
 }
 
 .state-tip {
@@ -129,4 +127,7 @@
   height: 28rpx;
   opacity: 0.3;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

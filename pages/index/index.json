@@ -1,6 +1,7 @@
 {
   "usingComponents": {
     "match-card": "../../components/match-card/match-card",
+    "pl-icon": "../../components/icon/index",
     "empty-state": "../../components/empty-state/empty-state",
     "loading-state": "../../components/loading-state/loading-state",
     "error-state": "../../components/error-state/error-state"

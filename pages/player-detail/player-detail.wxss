@@ -68,6 +68,9 @@
   height: 28rpx;
   margin-right: 10rpx;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* 基本信息列表 */
@@ -145,6 +148,9 @@
   margin-right: 12rpx;
   margin-top: 2rpx;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .data-note text {

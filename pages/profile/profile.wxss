@@ -74,6 +74,9 @@
   height: 28rpx;
   margin-right: 8rpx;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .section-more {
@@ -83,15 +86,13 @@
   color: #999999;
 }
 
-.arrow-right::after {
-  content: '';
-  display: inline-block;
-  width: 16rpx;
-  height: 16rpx;
-  border-top: 2rpx solid currentColor;
-  border-right: 2rpx solid currentColor;
-  transform: rotate(45deg);
+.arrow-right {
+  width: 24rpx;
+  height: 24rpx;
   margin-left: 8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* 关注的球队列表 */
@@ -141,9 +142,13 @@
 }
 
 .followed-item .arrow {
-  font-size: 40rpx;
-  color: #999999;
+  width: 28rpx;
+  height: 28rpx;
   margin-left: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 /* 关注空状态 */
@@ -198,6 +203,9 @@
   height: 36rpx;
   margin-right: 20rpx;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .settings-text {
@@ -213,8 +221,12 @@
 }
 
 .settings-item .arrow {
-  font-size: 40rpx;
-  color: #999999;
+  width: 28rpx;
+  height: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 /* 底部信息 */

@@ -7,11 +7,15 @@
     </view>
   </block>
   <block wx:elif="{{isFollowing}}">
-    <text class="check-icon">✓</text>
+    <view class="status-icon">
+      <pl-icon name="sys/success" size="16" color="#43A047"></pl-icon>
+    </view>
     <text>已关注</text>
   </block>
   <block wx:else>
-    <text class="plus-icon">+</text>
+    <view class="status-icon">
+      <pl-icon name="ac/add" size="16" color="#FFFFFF"></pl-icon>
+    </view>
     <text>关注</text>
   </block>
 </view>

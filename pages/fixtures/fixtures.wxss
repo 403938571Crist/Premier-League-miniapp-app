@@ -38,11 +38,9 @@
 .hero-arrow-icon {
   width: 22rpx;
   height: 22rpx;
-  filter: brightness(0) invert(1);
-}
-
-.hero-arrow-left {
-  transform: rotate(180deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .hero-title-group {
@@ -128,6 +126,9 @@
   width: 30rpx;
   height: 30rpx;
   opacity: 0.72;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .filters-texts {
@@ -178,6 +179,9 @@
   width: 24rpx;
   height: 24rpx;
   opacity: 0.72;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .content-shell {

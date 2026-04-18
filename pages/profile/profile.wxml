@@ -31,12 +31,16 @@
   <view class="section">
     <view class="section-header" bindtap="goToFollowedTeams">
       <view class="section-title">
-        <image class="section-icon" src="/images/icons/star.png" mode="aspectFit"></image>
+        <view class="section-icon">
+          <pl-icon name="ct/bookmark" size="20" color="#38003C"></pl-icon>
+        </view>
         <text>我的关注</text>
       </view>
       <view class="section-more">
         <text>{{followedTeams.length > 0 ? followedTeams.length + ' 支' : ''}}</text>
-        <text class="arrow-right"></text>
+        <view class="arrow-right">
+          <pl-icon name="ac/next" size="14" color="#999999"></pl-icon>
+        </view>
       </view>
     </view>
 
@@ -54,7 +58,9 @@
           <text class="team-name">{{item.name}}</text>
           <text class="team-rank" wx:if="{{item.rank}}">{{item.rank}}</text>
         </view>
-        <text class="arrow">›</text>
+        <view class="arrow">
+          <pl-icon name="ac/next" size="16" color="#999999"></pl-icon>
+        </view>
       </view>
     </view>
 
@@ -69,22 +75,34 @@
   <view class="section settings-section">
     <view class="settings-list">
       <view class="settings-item" bindtap="clearCache">
-        <image class="settings-icon" src="/images/icons/settings.png" mode="aspectFit"></image>
+        <view class="settings-icon">
+          <pl-icon name="sys/settings" size="22" color="#38003C"></pl-icon>
+        </view>
         <text class="settings-text">清除缓存</text>
         <text class="settings-extra">{{cacheSize}}</text>
-        <text class="arrow">›</text>
+        <view class="arrow">
+          <pl-icon name="ac/next" size="16" color="#999999"></pl-icon>
+        </view>
       </view>
       
       <view class="settings-item" bindtap="showAbout">
-        <image class="settings-icon" src="/images/icons/about.png" mode="aspectFit"></image>
+        <view class="settings-icon">
+          <pl-icon name="sys/info" size="22" color="#38003C"></pl-icon>
+        </view>
         <text class="settings-text">关于我们</text>
-        <text class="arrow">›</text>
+        <view class="arrow">
+          <pl-icon name="ac/next" size="16" color="#999999"></pl-icon>
+        </view>
       </view>
       
       <view class="settings-item" bindtap="showFeedback">
-        <image class="settings-icon" src="/images/icons/feedback.png" mode="aspectFit"></image>
+        <view class="settings-icon">
+          <pl-icon name="ct/comment" size="22" color="#38003C"></pl-icon>
+        </view>
         <text class="settings-text">意见反馈</text>
-        <text class="arrow">›</text>
+        <view class="arrow">
+          <pl-icon name="ac/next" size="16" color="#999999"></pl-icon>
+        </view>
       </view>
     </view>
   </view>

@@ -120,10 +120,13 @@
   color: #1F1F22;
 }
 
-.section-icon {
-  width: 26rpx;
-  height: 26rpx;
+.section-icon-wrap {
+  width: 30rpx;
+  height: 30rpx;
   margin-right: 10rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
 
@@ -250,13 +253,6 @@
   justify-content: center;
   background: rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(8rpx);
-}
-
-.news-cover-placeholder-icon {
-  width: 42rpx;
-  height: 42rpx;
-  filter: brightness(0) invert(1);
-  opacity: 0.92;
 }
 
 .news-cover-placeholder-source {
@@ -427,11 +423,6 @@
   font-size: 22rpx;
   color: #9b90a3;
   letter-spacing: 0.6rpx;
-}
-
-.news-arrow {
-  width: 28rpx;
-  height: 28rpx;
 }
 
 .social-section {

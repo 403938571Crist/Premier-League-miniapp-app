@@ -3,10 +3,14 @@
     <view class="hero">
       <view class="hero-top-row">
         <view class="hero-arrow" bindtap="prevDate" hover-class="hero-arrow-hover">
-          <image class="hero-arrow-icon hero-arrow-left" src="/images/icons/arrow-right.png" mode="aspectFit"></image>
+          <view class="hero-arrow-icon">
+            <pl-icon name="ac/back" size="18" color="#FFFFFF"></pl-icon>
+          </view>
         </view>
         <view class="hero-arrow" bindtap="nextDate" hover-class="hero-arrow-hover">
-          <image class="hero-arrow-icon" src="/images/icons/arrow-right.png" mode="aspectFit"></image>
+          <view class="hero-arrow-icon">
+            <pl-icon name="ac/next" size="18" color="#FFFFFF"></pl-icon>
+          </view>
         </view>
       </view>
 
@@ -32,7 +36,9 @@
   <view class="filters-wrap">
     <view class="filters-card">
       <view class="filters-main" bindtap="showDatePicker">
-        <image class="filters-icon" src="/images/icons/calendar.png" mode="aspectFit"></image>
+        <view class="filters-icon">
+          <pl-icon name="nav/schedule" size="22" color="#4A2A52"></pl-icon>
+        </view>
         <view class="filters-texts">
           <text class="filters-label">{{filterWeek}}</text>
           <text class="filters-date">{{filterDate}}</text>
@@ -41,10 +47,14 @@
 
       <view class="filters-actions">
         <view class="filters-action" bindtap="showDatePicker">
-          <image class="filters-action-icon" src="/images/icons/calendar.png" mode="aspectFit"></image>
+          <view class="filters-action-icon">
+            <pl-icon name="nav/schedule" size="18" color="#4A2A52"></pl-icon>
+          </view>
         </view>
         <view class="filters-action" bindtap="showStatusSheet">
-          <image class="filters-action-icon" src="/images/icons/list.png" mode="aspectFit"></image>
+          <view class="filters-action-icon">
+            <pl-icon name="ac/filter" size="18" color="#4A2A52"></pl-icon>
+          </view>
         </view>
       </view>
     </view>

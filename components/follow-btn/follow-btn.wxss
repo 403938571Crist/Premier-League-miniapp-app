@@ -26,14 +26,13 @@
   color: #999999;
 }
 
-.plus-icon,
-.check-icon {
+.status-icon {
+  width: 28rpx;
+  height: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-right: 8rpx;
-  font-size: 24rpx;
-}
-
-.check-icon {
-  color: #43A047;
 }
 
 .loading-dots {

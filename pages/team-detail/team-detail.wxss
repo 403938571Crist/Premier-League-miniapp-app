@@ -37,6 +37,9 @@
   height: 28rpx;
   margin-right: 10rpx;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Tab 切换 */
@@ -222,6 +225,9 @@
   height: 28rpx;
   margin-right: 10rpx;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .squad-list {
@@ -257,4 +263,7 @@
   height: 28rpx;
   margin-right: 10rpx;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

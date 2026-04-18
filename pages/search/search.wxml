@@ -1,6 +1,8 @@
 <view class="container">
   <view class="search-bar">
-    <image class="search-icon" src="/images/icons/search.png" mode="aspectFit"></image>
+    <view class="search-icon">
+      <pl-icon name="ac/search" size="20" color="#8E8E93"></pl-icon>
+    </view>
     <input
       class="search-input"
       placeholder="搜索球队或球员"
@@ -11,7 +13,7 @@
       confirm-type="search">
     </input>
     <view class="clear-btn" wx:if="{{keyword}}" bindtap="onClear">
-      <text class="clear-icon">×</text>
+      <pl-icon name="ac/close" size="14" color="#AAAAAA"></pl-icon>
     </view>
   </view>
 
@@ -43,7 +45,9 @@
             <text class="item-name">{{item.name}}</text>
             <text class="item-sub">{{item.shortName}}</text>
           </view>
-          <image class="arrow-icon" src="/images/icons/arrow-right.png" mode="aspectFit"></image>
+          <view class="arrow-icon">
+            <pl-icon name="ac/next" size="16" color="#A0A0A8"></pl-icon>
+          </view>
         </view>
       </view>
     </view>
@@ -63,7 +67,9 @@
             <text class="item-name">{{item.name}}</text>
             <text class="item-sub">{{item.positionLabel || item.chinesePosition || item.position}}{{item.nationalityLabel || item.chineseNationality || item.nationality ? ' · ' + (item.nationalityLabel || item.chineseNationality || item.nationality) : ''}}</text>
           </view>
-          <image class="arrow-icon" src="/images/icons/arrow-right.png" mode="aspectFit"></image>
+          <view class="arrow-icon">
+            <pl-icon name="ac/next" size="16" color="#A0A0A8"></pl-icon>
+          </view>
         </view>
       </view>
     </view>

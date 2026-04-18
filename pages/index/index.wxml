@@ -42,21 +42,21 @@
     <view class="quick-access">
       <view class="quick-item" bindtap="goToStandings">
         <view class="quick-icon-wrap">
-          <image class="quick-icon" src="/images/icons/trophy.png" mode="aspectFit"></image>
+          <pl-icon name="fb/trophy" size="{{42}}" color="#38003C"></pl-icon>
         </view>
         <text class="quick-text">积分榜</text>
         <text class="quick-subtext">实时排名</text>
       </view>
       <view class="quick-item" bindtap="goToFixtures">
         <view class="quick-icon-wrap">
-          <image class="quick-icon" src="/images/icons/calendar.png" mode="aspectFit"></image>
+          <pl-icon name="nav/schedule" size="{{42}}" color="#38003C"></pl-icon>
         </view>
         <text class="quick-text">赛程</text>
         <text class="quick-subtext">比赛日历</text>
       </view>
       <view class="quick-item" bindtap="goToTeams">
         <view class="quick-icon-wrap">
-          <image class="quick-icon" src="/images/icons/team.png" mode="aspectFit"></image>
+          <pl-icon name="fb/jersey" size="{{42}}" color="#38003C"></pl-icon>
         </view>
         <text class="quick-text">球队</text>
         <text class="quick-subtext">俱乐部档案</text>
@@ -66,7 +66,7 @@
     <view class="section">
       <view class="section-header">
         <view class="section-title">
-          <image class="section-icon" src="/images/icons/list.png" mode="aspectFit"></image>
+          <pl-icon name="ct/article" size="{{32}}" color="#38003C"></pl-icon>
           <text>英超资讯</text>
         </view>
       </view>
@@ -85,7 +85,7 @@
           <view class="news-cover news-cover-image-shell news-cover-{{item._coverThemeResolved}} {{item._coverState === 'ready' ? 'news-cover-live' : 'news-cover-placeholder-shell'}}">
             <view class="news-cover-placeholder">
               <view class="news-cover-placeholder-badge">
-                <image class="news-cover-placeholder-icon" src="/images/icons/news.png" mode="aspectFit"></image>
+                <pl-icon name="ct/article" size="{{28}}" color="#FFFFFF"></pl-icon>
               </view>
               <text class="news-cover-placeholder-source">{{item.source || 'Premier League'}}</text>
             </view>
@@ -114,7 +114,7 @@
             <text class="news-card-summary">{{item.summary}}</text>
             <view class="news-card-footer">
               <text class="news-source">{{item.mediaType}}</text>
-              <image class="news-arrow" src="/images/icons/arrow-right.png" mode="aspectFit"></image>
+              <pl-icon name="ac/next" size="{{24}}" color="#8E8E93"></pl-icon>
             </view>
           </view>
         </view>

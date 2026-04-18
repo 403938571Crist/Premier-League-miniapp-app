@@ -1,7 +1,8 @@
 {
   "usingComponents": {
     "loading-state": "../../components/loading-state/loading-state",
-    "error-state": "../../components/error-state/error-state"
+    "error-state": "../../components/error-state/error-state",
+    "pl-icon": "../../components/icon/index"
   },
   "backgroundColor": "#F5F5F5",
   "navigationBarTitleText": "球员详情"

@@ -77,8 +77,3 @@
   align-items: center;
   justify-content: center;
 }
-
-.arrow-icon {
-  font-size: 40rpx;
-  color: #999999;
-}

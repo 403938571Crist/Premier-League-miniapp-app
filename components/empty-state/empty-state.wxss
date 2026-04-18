@@ -7,10 +7,15 @@
   text-align: center;
 }
 
-.empty-icon {
+.empty-icon-shell {
   width: 240rpx;
   height: 240rpx;
   margin-bottom: 40rpx;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #F5F3F6 0%, #EFEBF1 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .empty-icon-placeholder {

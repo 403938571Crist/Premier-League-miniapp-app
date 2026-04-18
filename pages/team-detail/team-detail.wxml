@@ -50,7 +50,9 @@
       <!-- 近期战绩 -->
       <view class="card" wx:if="{{recentMatches.length > 0}}">
         <view class="card-title">
-          <image class="card-title-icon" src="/images/icons/chart.png" mode="aspectFit"></image>
+          <view class="card-title-icon">
+            <pl-icon name="nav/table" size="20" color="#38003C"></pl-icon>
+          </view>
           <text>近期战绩（近5场）</text>
         </view>
         <view class="recent-matches">
@@ -68,7 +70,9 @@
       <!-- 球队统计 -->
       <view class="card" wx:if="{{teamStats.position}}">
         <view class="card-title">
-          <image class="card-title-icon" src="/images/icons/stats.png" mode="aspectFit"></image>
+          <view class="card-title-icon">
+            <pl-icon name="fb/trophy" size="20" color="#38003C"></pl-icon>
+          </view>
           <text>球队统计</text>
         </view>
         <view class="stats-list">
@@ -94,7 +98,9 @@
       <!-- 球队简介 -->
       <view class="card" wx:if="{{team.address || team.founded}}">
         <view class="card-title">
-          <image class="card-title-icon" src="/images/icons/info-card.png" mode="aspectFit"></image>
+          <view class="card-title-icon">
+            <pl-icon name="sys/info" size="20" color="#38003C"></pl-icon>
+          </view>
           <text>球队信息</text>
         </view>
         <view class="info-list">
@@ -119,7 +125,9 @@
       <!-- 门将 -->
       <view class="squad-section" wx:if="{{squad.goalkeepers.length > 0}}">
         <view class="squad-title">
-          <image class="squad-title-icon" src="/images/icons/goalkeeper.png" mode="aspectFit"></image>
+          <view class="squad-title-icon">
+            <pl-icon name="fb/goal" size="20" color="#38003C"></pl-icon>
+          </view>
           <text>门将（{{squad.goalkeepers.length}}）</text>
         </view>
         <view class="squad-list">
@@ -135,7 +143,9 @@
       <!-- 后卫 -->
       <view class="squad-section" wx:if="{{squad.defenders.length > 0}}">
         <view class="squad-title">
-          <image class="squad-title-icon" src="/images/icons/defender.png" mode="aspectFit"></image>
+          <view class="squad-title-icon">
+            <pl-icon name="fb/club" size="20" color="#38003C"></pl-icon>
+          </view>
           <text>后卫（{{squad.defenders.length}}）</text>
         </view>
         <view class="squad-list">
@@ -151,7 +161,9 @@
       <!-- 中场 -->
       <view class="squad-section" wx:if="{{squad.midfielders.length > 0}}">
         <view class="squad-title">
-          <image class="squad-title-icon" src="/images/icons/midfielder.png" mode="aspectFit"></image>
+          <view class="squad-title-icon">
+            <pl-icon name="fb/pitch" size="20" color="#38003C"></pl-icon>
+          </view>
           <text>中场（{{squad.midfielders.length}}）</text>
         </view>
         <view class="squad-list">
@@ -167,7 +179,9 @@
       <!-- 前锋 -->
       <view class="squad-section" wx:if="{{squad.forwards.length > 0}}">
         <view class="squad-title">
-          <image class="squad-title-icon" src="/images/icons/forward.png" mode="aspectFit"></image>
+          <view class="squad-title-icon">
+            <pl-icon name="fb/boot" size="20" color="#38003C"></pl-icon>
+          </view>
           <text>前锋（{{squad.forwards.length}}）</text>
         </view>
         <view class="squad-list">
@@ -190,7 +204,9 @@
     <view class="tab-content" wx:if="{{activeTab === 'fixtures'}}">
       <view class="fixtures-section">
         <view class="section-title fixtures-title">
-          <image class="section-title-icon" src="/images/icons/calendar.png" mode="aspectFit"></image>
+          <view class="section-title-icon">
+            <pl-icon name="nav/schedule" size="20" color="#38003C"></pl-icon>
+          </view>
           <text>近期赛程</text>
         </view>
         <match-card 

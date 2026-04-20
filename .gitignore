@@ -3,3 +3,11 @@ node_modules/
 dist/
 .DS_Store
 Thumbs.db
+
+# Keep local docs but do not track them in Git
+/DEPLOYMENT.md
+/DESIGN.md
+/英超小程序开发文档.md
+/英超小程序项目文档.md
+/英超小程序项目文档_Figma精简版.md
+/设计规范文档.md

@@ -1,4 +1,4 @@
-<view class="container">
+﻿<view class="container">
   <view class="search-bar">
     <view class="search-icon">
       <pl-icon name="ac/search" size="20" color="#8E8E93"></pl-icon>
@@ -65,7 +65,7 @@
           <image class="item-photo" src="{{item.photo}}" mode="aspectFill"></image>
           <view class="item-info">
             <text class="item-name">{{item.name}}</text>
-            <text class="item-sub">{{item.positionLabel || item.chinesePosition || item.position}}{{item.nationalityLabel || item.chineseNationality || item.nationality ? ' · ' + (item.nationalityLabel || item.chineseNationality || item.nationality) : ''}}</text>
+            <text class="item-sub">{{item.positionLabel || item.chinesePosition || item.position}}{{item.nationalityLabel || item.chineseNationality || item.nationality ? ' / ' + (item.nationalityLabel || item.chineseNationality || item.nationality) : ''}}</text>
           </view>
           <view class="arrow-icon">
             <pl-icon name="ac/next" size="16" color="#A0A0A8"></pl-icon>

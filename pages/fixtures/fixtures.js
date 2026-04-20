@@ -1,4 +1,4 @@
-const { getFixtures } = require('../../utils/api');
+﻿const { getFixtures } = require('../../utils/api');
 const { formatDate } = require('../../utils/util');
 
 const SHOW_REFRESH_INTERVAL = 2 * 60 * 1000;
@@ -119,7 +119,7 @@ Page({
       return '';
     }
 
-    return `英超第${matches[0].matchday}轮`;
+    return `英超第 ${matches[0].matchday} 轮`;
   },
 
   getHeroEyebrow(matches) {

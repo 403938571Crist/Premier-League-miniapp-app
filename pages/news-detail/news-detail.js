@@ -33,6 +33,15 @@ function mapMediaType(type) {
   return MEDIA_TYPE_LABEL_MAP[key] || type;
 }
 
+function getCacheTimeText(cachedAt) {
+  if (!cachedAt) {
+    return '';
+  }
+
+  const minutesAgo = Math.floor((Date.now() - cachedAt) / 60000);
+  return minutesAgo < 1 ? '刚刚更新' : `${minutesAgo} 分钟前`;
+}
+
 function blocksFullText(blocks) {
   if (!Array.isArray(blocks)) return '';
   return blocks.map((b) => {
@@ -71,8 +80,7 @@ function extractLede(summary) {
   if (!summary) return '';
   const trimmed = summary.trim();
   const match = trimmed.match(/^[^。！？!?\n]{8,120}[。！？!?]?/);
-  const lede = match ? match[0].trim() : trimmed.slice(0, 100);
-  return lede;
+  return match ? match[0].trim() : trimmed.slice(0, 100);
 }
 
 function splitParagraph(text) {
@@ -191,7 +199,6 @@ function buildViewModel(article) {
 
   const lede = summaryInBlocks ? extractLede(summary) : summary;
   const blocks = summaryInBlocks ? removeLeadingRepeatedText(normalizedBlocks, summary) : normalizedBlocks;
-  const showLede = !!lede;
   const contentImages = Array.isArray(article.contentImages)
     ? article.contentImages.filter((u) => typeof u === 'string' && u.trim())
     : [];
@@ -201,10 +208,11 @@ function buildViewModel(article) {
     blocks,
     mediaTypeLabel: mapMediaType(article.mediaType),
     lede,
-    showLede,
+    showLede: !!lede,
     hasImage: !!article.coverImage,
     contentImages,
-    hasContentImages: contentImages.length > 0
+    hasContentImages: contentImages.length > 0,
+    cacheTimeText: article.cachedAt ? getCacheTimeText(article.cachedAt) : ''
   };
 }
 
@@ -213,36 +221,69 @@ Page({
     loading: true,
     article: null,
     sourceLabel: '',
-    notFound: false
+    notFound: false,
+    errorMessage: ''
   },
 
-  async onLoad(options) {
+  onLoad(options) {
     const { id } = options || {};
 
     if (!id) {
       this.setData({
         loading: false,
-        notFound: true
+        notFound: true,
+        errorMessage: '缺少资讯 ID'
       });
+      wx.showToast({ title: '缺少资讯 ID', icon: 'none' });
       return;
     }
 
+    this.articleId = id;
+    this.loadArticle(id, true);
+  },
+
+  onPullDownRefresh() {
+    if (!this.articleId) {
+      wx.stopPullDownRefresh();
+      return;
+    }
+
+    this.loadArticle(this.articleId, false).finally(() => {
+      wx.stopPullDownRefresh();
+    });
+  },
+
+  async loadArticle(id, useCache = true) {
+    this.setData({
+      loading: true,
+      notFound: false,
+      errorMessage: ''
+    });
+
     try {
-      const raw = await getNewsDetail(id);
+      const raw = await getNewsDetail(id, useCache);
       const article = buildViewModel(raw);
+
+      if (!article || !article.title) {
+        throw new Error('资讯内容为空');
+      }
 
       this.setData({
         loading: false,
         article,
-        sourceLabel: SOURCE_LABEL_MAP[article.sourceType] || article.source,
-        notFound: false
+        sourceLabel: SOURCE_LABEL_MAP[article.sourceType] || article.source || '英超资讯',
+        notFound: false,
+        errorMessage: ''
       });
     } catch (error) {
       console.error('Failed to load news detail:', error);
       this.setData({
         loading: false,
-        notFound: true
+        article: null,
+        notFound: true,
+        errorMessage: error.message || '资讯加载失败'
       });
+      wx.showToast({ title: '资讯加载失败', icon: 'none' });
     }
   },
 

@@ -1,4 +1,4 @@
-const { getStandings, getTopScorers, getTopAssists } = require('../../utils/api');
+﻿const { getStandings, getTopScorers, getTopAssists } = require('../../utils/api');
 
 const SHOW_REFRESH_INTERVAL = 5 * 60 * 1000;
 const PLAYER_STAT_LIMIT = 20;
@@ -91,7 +91,7 @@ Page({
     const minutesAgo = Math.floor((Date.now() - result.cachedAt) / 60000);
     return {
       isCached: true,
-      cacheTime: minutesAgo < 1 ? '刚刚' : `${minutesAgo} 分钟前`
+      cacheTime: minutesAgo < 1 ? '刚刚更新' : `${minutesAgo} 分钟前`
     };
   },
 
@@ -213,15 +213,14 @@ Page({
   },
 
   onAvatarError(e) {
-    // 图片加载失败（403/超时）—— 直接隐藏，背景色占位，不报红框
     const target = e.currentTarget;
     if (!target) return;
-    // 给 image 元素加 class 让它透明，背景色自然显示
-    // WeChat miniapp 不能直接操作 DOM，通过 dataset index + list key 更新数据
+
     const dataset = target.dataset || {};
-    const list = dataset.list; // 'scorers' or 'assists'
-    const idx  = dataset.idx;
+    const list = dataset.list;
+    const idx = dataset.idx;
     if (!list || idx === undefined) return;
+
     const key = `${list}[${idx}].photoUrl`;
     this.setData({ [key]: '' });
   },

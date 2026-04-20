@@ -1,4 +1,4 @@
-<view class="container">
+﻿<view class="container">
   <loading-state wx:if="{{loading && !featuredMatches.length}}"></loading-state>
 
   <error-state
@@ -9,8 +9,6 @@
   </error-state>
 
   <block wx:else>
-
-    <!-- 顶部固定区：比赛卡 + 快捷入口 -->
     <view class="top-section">
       <view class="featured-section" wx:if="{{featuredMatches.length > 0}}">
         <view class="featured-shell">
@@ -74,11 +72,10 @@
       </view>
 
       <view class="cache-tip" wx:if="{{isCached}}">
-        <text>数据来自缓存 · {{cacheTime}}</text>
+        <text>数据来自缓存 / {{cacheTime}}</text>
       </view>
     </view>
 
-    <!-- 新闻列表：scroll-view 填满剩余高度 -->
     <scroll-view
       class="news-scroll"
       scroll-y
@@ -156,12 +153,11 @@
       <empty-state
         wx:elif="{{!newsItems.length}}"
         title="暂无资讯"
-        description="稍后再来看最新英超动态">
+        description="稍后再来查看最新英超动态"
+        show-action="{{false}}">
       </empty-state>
 
-      <!-- 底部留白，防止内容藏在 tab 栏下面 -->
       <view class="scroll-bottom-safe"></view>
     </scroll-view>
-
   </block>
 </view>

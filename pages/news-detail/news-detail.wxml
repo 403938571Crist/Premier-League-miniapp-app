@@ -27,6 +27,10 @@
   </view>
 
   <view class="content">
+    <view class="cache-tip" wx:if="{{article.isCached && article.cacheTimeText}}">
+      <text>当前展示的是缓存内容，{{article.cacheTimeText}}</text>
+    </view>
+
     <view class="lede" wx:if="{{article.showLede}}">
       <text>{{article.lede}}</text>
     </view>
@@ -101,7 +105,7 @@
 <view class="page" wx:else>
   <empty-state
     title="资讯不存在"
-    description="当前资讯详情未找到"
+    description="{{errorMessage || '当前资讯详情未找到'}}"
     show-action="{{false}}">
   </empty-state>
 </view>

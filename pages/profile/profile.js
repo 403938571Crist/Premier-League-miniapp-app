@@ -1,4 +1,4 @@
-const { showConfirm, showSuccess, showError } = require('../../utils/util');
+﻿const { showConfirm, showSuccess } = require('../../utils/util');
 
 Page({
   data: {
@@ -49,21 +49,20 @@ Page({
 
   loadFollowedTeams() {
     const app = getApp();
-    const followedTeams = app.globalData.followedTeams || [];
-    
-    // 如果有积分榜缓存，尝试获取关注球队的排名信息
+    const followedTeams = (app.globalData.followedTeams || []).map((team) => ({ ...team }));
+
     const standingsCache = app.getCache('standings');
-    if (standingsCache && standingsCache.data && standingsCache.data.standings) {
+    if (standingsCache?.data?.standings) {
       const table = standingsCache.data.standings[0]?.table || [];
-      
-      followedTeams.forEach(team => {
-        const standing = table.find(s => s.team.id === team.id);
+
+      followedTeams.forEach((team) => {
+        const standing = table.find((item) => item.team.id === team.id);
         if (standing) {
-          team.rank = `英超第${standing.position}名  ${standing.points}分`;
+          team.rank = `英超第 ${standing.position} 名 · ${standing.points} 分`;
         }
       });
     }
-    
+
     this.setData({ followedTeams });
   },
 
@@ -71,24 +70,23 @@ Page({
     try {
       const keys = wx.getStorageInfoSync().keys;
       let size = 0;
-      
-      keys.forEach(key => {
+
+      keys.forEach((key) => {
         const value = wx.getStorageSync(key);
-        if (value) {
+        if (value !== undefined && value !== null && value !== '') {
           size += JSON.stringify(value).length;
         }
       });
-      
-      // 转换为可读格式
+
       let sizeText = '';
       if (size < 1024) {
-        sizeText = size + 'B';
+        sizeText = `${size}B`;
       } else if (size < 1024 * 1024) {
-        sizeText = (size / 1024).toFixed(1) + 'KB';
+        sizeText = `${(size / 1024).toFixed(1)}KB`;
       } else {
-        sizeText = (size / (1024 * 1024)).toFixed(1) + 'MB';
+        sizeText = `${(size / (1024 * 1024)).toFixed(1)}MB`;
       }
-      
+
       this.setData({ cacheSize: sizeText });
     } catch (e) {
       console.error('计算缓存大小失败:', e);
@@ -96,7 +94,6 @@ Page({
   },
 
   goToFollowedTeams() {
-    // 已经显示在当前页面，可以展开/收起或不做操作
     console.log('查看所有关注球队');
   },
 
@@ -109,12 +106,12 @@ Page({
 
   async clearCache() {
     const confirmed = await showConfirm('清除缓存', '确定要清除所有缓存数据吗？');
-    
+
     if (confirmed) {
       const app = getApp();
       app.clearCache();
-      
-      this.setData({ cacheSize: '0KB' });
+
+      this.setData({ cacheSize: '0KB', followedTeams: [] });
       showSuccess('清除成功');
     }
   },

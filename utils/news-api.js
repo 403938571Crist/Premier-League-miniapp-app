@@ -24,7 +24,7 @@ const SOURCE_META = {
   },
   x: {
     label: 'X',
-    coverLabel: '绀惧獟蹇',
+    coverLabel: 'Social',
     coverTheme: 'x',
     coverAccent: '#FFFFFF'
   },
@@ -41,8 +41,8 @@ const SOURCE_META = {
     coverAccent: '#052962'
   },
   reddit: {
-    label: 'Reddit 绀惧尯',
-    coverLabel: '鐞冭糠鐑',
+    label: 'Reddit 社区',
+    coverLabel: '球迷热议',
     coverTheme: 'reddit',
     coverAccent: '#FF4500'
   },
@@ -127,42 +127,78 @@ function formatPublishedAt(value) {
   return formatDate(date, 'MM-DD HH:mm');
 }
 
-function normalizeBlocks(blocks = [], summary = '') {
+function normalizeBlocks(blocks = [], summary = '', body = '') {
   if (Array.isArray(blocks) && blocks.length) {
     return blocks;
   }
 
-  if (!summary) {
+  const content = String(summary || body || '').trim();
+  if (!content) {
     return [];
   }
 
-  return [
-    {
-      type: 'paragraph',
-      text: summary
-    }
+  return content
+    .split(/\n{2,}/)
+    .map((text) => text.trim())
+    .filter(Boolean)
+    .map((text) => ({ type: 'paragraph', text }));
+}
+
+function normalizeContentImages(article = {}) {
+  const candidates = [
+    article.contentImages,
+    article.images,
+    article.imageList,
+    article.gallery,
+    article.media?.images
   ];
+
+  const list = candidates.find((item) => Array.isArray(item)) || [];
+  return list
+    .map((item) => {
+      if (typeof item === 'string') return item;
+      return item?.url || item?.src || item?.imageUrl || '';
+    })
+    .filter(Boolean);
+}
+
+function normalizeSourceType(item = {}) {
+  return item.sourceType || item.sourceCode || item.source_key || 'media';
+}
+
+function normalizeTags(item = {}) {
+  if (Array.isArray(item.tags)) {
+    return item.tags.filter(Boolean);
+  }
+  if (Array.isArray(item.tagList)) {
+    return item.tagList.filter(Boolean);
+  }
+  if (typeof item.tag === 'string' && item.tag.trim()) {
+    return [item.tag.trim()];
+  }
+  return [];
 }
 
 function normalizeNewsItem(item = {}) {
-  const meta = getSourceMeta(item.sourceType);
-  const tags = Array.isArray(item.tags) ? item.tags.filter(Boolean) : [];
+  const sourceType = normalizeSourceType(item);
+  const meta = getSourceMeta(sourceType);
+  const tags = normalizeTags(item);
 
   return {
-    id: item.id || item.newsId || '',
-    title: item.title || item.headline || '',
-    summary: item.summary || item.description || item.excerpt || '',
-    source: item.source || meta.label,
-    sourceType: item.sourceType || 'media',
-    mediaType: item.mediaType || '鍥炬枃',
-    publishedAt: formatPublishedAt(item.publishedAt || item.publishTime || item.createdAt),
-    publishedAtRaw: item.publishedAt || item.publishTime || item.createdAt || '',
-    coverImage: item.coverImage || item.imageUrl || item.cover || '',
+    id: item.id || item.newsId || item.articleId || '',
+    title: item.title || item.headline || item.name || '',
+    summary: item.summary || item.description || item.excerpt || item.brief || '',
+    source: item.source || item.sourceName || meta.label,
+    sourceType,
+    mediaType: item.mediaType || item.contentType || '图文',
+    publishedAt: formatPublishedAt(item.publishedAt || item.publishTime || item.createdAt || item.updatedAt),
+    publishedAtRaw: item.publishedAt || item.publishTime || item.createdAt || item.updatedAt || '',
+    coverImage: item.coverImage || item.imageUrl || item.cover || item.thumbnail || item.poster || '',
     tags,
     tag: tags[0] || meta.label,
-    hotScore: item.hotScore || 0,
-    author: item.author || '',
-    url: item.url || '',
+    hotScore: item.hotScore || item.score || 0,
+    author: item.author || item.authorName || '',
+    url: item.url || item.link || item.sourceUrl || '',
     coverLabel: meta.coverLabel,
     coverTheme: meta.coverTheme,
     coverAccent: meta.coverAccent
@@ -171,21 +207,39 @@ function normalizeNewsItem(item = {}) {
 
 function normalizeNewsArticle(article = {}) {
   const item = normalizeNewsItem(article);
+  const body = article.body || article.content || article.text || '';
 
   return {
     ...item,
-    sourceNote: article.sourceNote || '',
+    sourceNote: article.sourceNote || article.note || '',
     relatedTeamIds: Array.isArray(article.relatedTeamIds) ? article.relatedTeamIds : [],
     relatedPlayerIds: Array.isArray(article.relatedPlayerIds) ? article.relatedPlayerIds : [],
-    blocks: normalizeBlocks(article.blocks || article.contentBlocks, item.summary),
-    contentImages: Array.isArray(article.contentImages)
-      ? article.contentImages.filter(Boolean)
-      : []
+    blocks: normalizeBlocks(article.blocks || article.contentBlocks, item.summary, body),
+    contentImages: normalizeContentImages(article)
   };
 }
 
 function filterNewsItems(list = []) {
   return list.filter((item) => !FILTERED_SOURCE_TYPES.includes(item.sourceType));
+}
+
+function normalizeListResponse(data, params = {}) {
+  const list = Array.isArray(data)
+    ? data
+    : Array.isArray(data?.list)
+      ? data.list
+      : Array.isArray(data?.records)
+        ? data.records
+        : Array.isArray(data?.items)
+          ? data.items
+          : [];
+
+  return {
+    list: filterNewsItems(list.map(normalizeNewsItem)),
+    page: data?.page || data?.current || params.page || 1,
+    pageSize: data?.pageSize || data?.size || params.pageSize || list.length || 10,
+    total: data?.total || data?.count || list.length || 0
+  };
 }
 
 function getNewsList(params = {}, useCache = true) {
@@ -198,14 +252,7 @@ function getNewsList(params = {}, useCache = true) {
   }
 
   return requestNews(`/news${query ? `?${query}` : ''}`).then((data) => {
-    const list = Array.isArray(data) ? data : Array.isArray(data?.list) ? data.list : Array.isArray(data?.records) ? data.records : [];
-    const result = {
-      list: filterNewsItems(list.map(normalizeNewsItem)),
-      page: data?.page || data?.current || params.page || 1,
-      pageSize: data?.pageSize || data?.size || params.pageSize || 10,
-      total: data?.total || list.length || 0
-    };
-
+    const result = normalizeListResponse(data, params);
     setCache(cacheKey, result);
     return {
       ...cloneData(result),
@@ -242,11 +289,7 @@ function getTransferNews(params = {}, useCache = true) {
   }
 
   return requestNews(`/news/transfers${query ? `?${query}` : ''}`).then((data) => {
-    const list = Array.isArray(data) ? data : Array.isArray(data?.list) ? data.list : Array.isArray(data?.records) ? data.records : [];
-    const result = {
-      list: filterNewsItems(list.map(normalizeNewsItem))
-    };
-
+    const result = normalizeListResponse(data, params);
     setCache(cacheKey, result);
     return {
       ...cloneData(result),

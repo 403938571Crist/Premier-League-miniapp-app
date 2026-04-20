@@ -1,5 +1,4 @@
-<view class="container">
-  <!-- 用户信息头部 -->
+﻿<view class="container">
   <view class="user-header">
     <view class="user-avatar-wrap" bindtap="onGetUserInfo">
       <image
@@ -27,7 +26,6 @@
     </button>
   </view>
 
-  <!-- 我的关注 -->
   <view class="section">
     <view class="section-header" bindtap="goToFollowedTeams">
       <view class="section-title">
@@ -44,11 +42,10 @@
       </view>
     </view>
 
-    <!-- 关注的球队列表 -->
     <view class="followed-list" wx:if="{{followedTeams.length > 0}}">
-      <view 
-        class="followed-item" 
-        wx:for="{{followedTeams}}" 
+      <view
+        class="followed-item"
+        wx:for="{{followedTeams}}"
         wx:key="id"
         bindtap="goToTeamDetail"
         data-id="{{item.id}}"
@@ -64,14 +61,12 @@
       </view>
     </view>
 
-    <!-- 空状态 -->
     <view class="followed-empty" wx:else>
       <text>还没有关注球队</text>
       <text class="sub-text">关注你喜欢的球队，快速查看最新动态</text>
     </view>
   </view>
 
-  <!-- 设置列表 -->
   <view class="section settings-section">
     <view class="settings-list">
       <view class="settings-item" bindtap="clearCache">
@@ -84,7 +79,7 @@
           <pl-icon name="ac/next" size="16" color="#999999"></pl-icon>
         </view>
       </view>
-      
+
       <view class="settings-item" bindtap="showAbout">
         <view class="settings-icon">
           <pl-icon name="sys/info" size="22" color="#38003C"></pl-icon>
@@ -94,7 +89,7 @@
           <pl-icon name="ac/next" size="16" color="#999999"></pl-icon>
         </view>
       </view>
-      
+
       <view class="settings-item" bindtap="showFeedback">
         <view class="settings-icon">
           <pl-icon name="ct/comment" size="22" color="#38003C"></pl-icon>
@@ -107,7 +102,6 @@
     </view>
   </view>
 
-  <!-- 底部信息 -->
   <view class="footer">
     <text class="version">英超资讯小程序 v1.0.0</text>
     <text class="data-source">数据来源于后端 /api 聚合服务</text>

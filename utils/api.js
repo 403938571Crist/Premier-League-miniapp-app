@@ -1,12 +1,5 @@
-const { ERROR_CODES, ERROR_MESSAGES } = require('./constants');
-const { API_BASE_URL } = require('./env-config');
-
-function getApiBaseUrl() {
-  const app = getApp();
-  return app?.globalData?.backendApiBaseUrl
-    || app?.globalData?.apiBaseUrl
-    || API_BASE_URL;
-}
+﻿const { ERROR_CODES, ERROR_MESSAGES } = require('./constants');
+const { request } = require('./request');
 
 function buildQueryString(params = {}) {
   return Object.keys(params)
@@ -50,37 +43,12 @@ function wrapCachedResult(cache, transform = (data) => data) {
 }
 
 function requestApi(path, options = {}) {
-  const { method = 'GET', data } = options;
-
-  return new Promise((resolve, reject) => {
-    wx.request({
-      url: `${getApiBaseUrl()}${path}`,
-      method,
-      data,
-      header: {
-        'Content-Type': 'application/json'
-      },
-      timeout: 10000,
-      success: (res) => {
-        const response = res.data || {};
-
-        if (res.statusCode < 200 || res.statusCode >= 300) {
-          reject(new Error(`HTTP ${res.statusCode}`));
-          return;
-        }
-
-        if (response.code !== 0) {
-          reject(new Error(response.message || ERROR_MESSAGES.SERVER_ERROR));
-          return;
-        }
-
-        resolve(response.data);
-      },
-      fail: (err) => {
-        console.error('Backend request failed:', err);
-        reject(new Error(ERROR_MESSAGES.NETWORK_ERROR || 'Network error'));
-      }
-    });
+  return request({
+    path,
+    method: options.method || 'GET',
+    data: options.data,
+    errorMessage: ERROR_MESSAGES.SERVER_ERROR,
+    showError: false
   });
 }
 
@@ -92,35 +60,37 @@ function normalizeStatus(status) {
 }
 
 function normalizeTeamId(team) {
-  return team?.apiId || team?.id || null;
+  return team?.apiId || team?.teamId || team?.id || null;
 }
 
 function normalizeTeamName(team) {
-  return team?.chineseName || team?.shortName || team?.name || '';
+  return team?.chineseName || team?.shortName || team?.teamName || team?.name || '';
 }
 
 function normalizeTeamDetail(team = {}) {
+  const source = team.team || team;
+
   return {
-    id: normalizeTeamId(team),
-    dbId: team.id || null,
-    apiId: team.apiId || team.id || null,
-    name: normalizeTeamName(team),
-    shortName: team.shortName || team.name || '',
-    crest: team.crestUrl || '/images/default/team.png',
-    venue: team.venue || '',
-    founded: team.founded || null,
-    address: team.address || '',
-    website: team.website || '',
-    clubColors: team.clubColors || '',
-    position: team.position || null,
-    playedGames: team.playedGames || 0,
-    won: team.won || 0,
-    draw: team.draw || 0,
-    lost: team.lost || 0,
-    points: team.points || 0,
-    goalsFor: team.goalsFor || 0,
-    goalsAgainst: team.goalsAgainst || 0,
-    goalDifference: team.goalDifference || 0,
+    id: normalizeTeamId(source),
+    dbId: source.id || null,
+    apiId: source.apiId || source.teamId || source.id || null,
+    name: normalizeTeamName(source),
+    shortName: source.shortName || source.teamShortName || source.name || '',
+    crest: source.crestUrl || source.crest || '/images/default/team.png',
+    venue: source.venue || '',
+    founded: source.founded || null,
+    address: source.address || '',
+    website: source.website || '',
+    clubColors: source.clubColors || '',
+    position: team.position || source.position || null,
+    playedGames: team.playedGames || team.played || source.playedGames || 0,
+    won: team.won || source.won || 0,
+    draw: team.draw || source.draw || 0,
+    lost: team.lost || source.lost || 0,
+    points: team.points || source.points || 0,
+    goalsFor: team.goalsFor || team.goals || source.goalsFor || 0,
+    goalsAgainst: team.goalsAgainst || source.goalsAgainst || 0,
+    goalDifference: team.goalDifference || source.goalDifference || 0,
     raw: team
   };
 }
@@ -153,13 +123,16 @@ function normalizeScoreValue(value) {
 }
 
 function normalizeMatch(match = {}) {
+  const homeTeam = match.homeTeam || {};
+  const awayTeam = match.awayTeam || {};
+
   return {
-    id: match.apiId || match.id,
+    id: match.apiId || match.matchId || match.id,
     dbId: match.id || null,
-    apiId: match.apiId || match.id,
+    apiId: match.apiId || match.matchId || match.id,
     season: match.season || '',
     matchday: match.matchday || null,
-    utcDate: match.matchDate,
+    utcDate: match.utcDate || match.matchDate || match.kickoffTime || '',
     status: normalizeStatus(match.status),
     minute: match.duration || '',
     venue: match.venue || '',
@@ -169,23 +142,23 @@ function normalizeMatch(match = {}) {
       name: 'Premier League'
     },
     homeTeam: {
-      id: match.homeTeamId || null,
-      name: match.homeTeamChineseName || match.homeTeamName || '',
-      crest: match.homeTeamCrest || '/images/default/team.png'
+      id: match.homeTeamId || homeTeam.id || homeTeam.apiId || null,
+      name: match.homeTeamChineseName || match.homeTeamName || homeTeam.chineseName || homeTeam.shortName || homeTeam.name || '',
+      crest: match.homeTeamCrest || homeTeam.crestUrl || homeTeam.crest || '/images/default/team.png'
     },
     awayTeam: {
-      id: match.awayTeamId || null,
-      name: match.awayTeamChineseName || match.awayTeamName || '',
-      crest: match.awayTeamCrest || '/images/default/team.png'
+      id: match.awayTeamId || awayTeam.id || awayTeam.apiId || null,
+      name: match.awayTeamChineseName || match.awayTeamName || awayTeam.chineseName || awayTeam.shortName || awayTeam.name || '',
+      crest: match.awayTeamCrest || awayTeam.crestUrl || awayTeam.crest || '/images/default/team.png'
     },
     score: {
       fullTime: {
-        home: normalizeScoreValue(match.homeScore),
-        away: normalizeScoreValue(match.awayScore)
+        home: normalizeScoreValue(match.homeScore ?? match.score?.fullTime?.home),
+        away: normalizeScoreValue(match.awayScore ?? match.score?.fullTime?.away)
       },
       halfTime: {
-        home: normalizeScoreValue(match.homeHalfScore),
-        away: normalizeScoreValue(match.awayHalfScore)
+        home: normalizeScoreValue(match.homeHalfScore ?? match.score?.halfTime?.home),
+        away: normalizeScoreValue(match.awayHalfScore ?? match.score?.halfTime?.away)
       }
     },
     raw: match
@@ -237,7 +210,7 @@ function normalizePlayerStat(stat = {}) {
     teamName,
     teamShortName: stat.teamShortName || stat.teamName || '',
     teamCrest: stat.teamCrest || '/images/default/team.png',
-    position: stat.chinesePosition || stat.position || '球员',
+    position: stat.chinesePosition || stat.position || '鐞冨憳',
     goals: stat.goals || 0,
     assists: stat.assists || 0,
     penalties: stat.penalties || 0,
@@ -256,11 +229,18 @@ async function getStandings(type = 'TOTAL', useCache = true) {
   }
 
   const data = await requestApi(buildApiPath('/teams/standings', { type }));
+  const list = Array.isArray(data)
+    ? data
+    : Array.isArray(data?.table)
+      ? data.table
+      : Array.isArray(data?.standings)
+        ? data.standings
+        : [];
   const result = {
     standings: [
       {
         type,
-        table: Array.isArray(data) ? data.map(normalizeStandingRow) : []
+        table: list.map(normalizeStandingRow)
       }
     ]
   };
@@ -299,8 +279,9 @@ async function getFixtures(params = {}, useCache = true) {
   }
 
   const data = await requestApi(buildApiPath(path, queryParams));
+  const list = Array.isArray(data) ? data : Array.isArray(data?.matches) ? data.matches : [];
   const result = {
-    matches: normalizeMatches(Array.isArray(data) ? data : [])
+    matches: normalizeMatches(list)
   };
 
   setCache(cacheKey, result);
@@ -319,8 +300,9 @@ async function getTeams(useCache = true) {
   }
 
   const data = await requestApi('/teams');
+  const list = Array.isArray(data) ? data : Array.isArray(data?.teams) ? data.teams : [];
   const result = {
-    teams: Array.isArray(data) ? data.map(normalizeTeamDetail) : []
+    teams: list.map(normalizeTeamDetail)
   };
 
   setCache(cacheKey, result);
@@ -357,8 +339,9 @@ async function getTeamFixtures(teamId, limit = 10, useCache = true) {
   }
 
   const data = await requestApi(`/teams/${teamId}/matches`);
+  const list = Array.isArray(data) ? data : Array.isArray(data?.matches) ? data.matches : [];
   const result = {
-    matches: normalizeMatches(Array.isArray(data) ? data : []).slice(0, limit)
+    matches: normalizeMatches(list).slice(0, limit)
   };
 
   setCache(cacheKey, result);
@@ -383,7 +366,7 @@ async function getTeamSquad(teamId, useCache = true) {
     midfielders: (data.midfielders || []).map(normalizePlayer),
     forwards: (data.attackers || data.forwards || []).map(normalizePlayer),
     all: (data.all || []).map(normalizePlayer),
-    totalCount: data.totalCount || 0
+    totalCount: data.totalCount || data.total || 0
   };
 
   setCache(cacheKey, result);
@@ -405,11 +388,11 @@ async function getTeamStats(teamId, useCache = true) {
   const result = {
     position: data.position || null,
     points: data.points || 0,
-    played: data.played || 0,
+    played: data.played || data.playedGames || 0,
     won: data.won || 0,
     draw: data.draw || 0,
     lost: data.lost || 0,
-    goalsFor: data.goalsFor || 0,
+    goalsFor: data.goalsFor || data.goals || 0,
     goalsAgainst: data.goalsAgainst || 0,
     goalDifference: data.goalDifference || 0,
     winRate: data.winRate || ''
@@ -449,8 +432,9 @@ async function getPlayerMatches(playerId, limit = 10, useCache = true) {
   }
 
   const data = await requestApi(buildApiPath(`/players/${playerId}/matches`, { limit }));
+  const list = Array.isArray(data) ? data : Array.isArray(data?.matches) ? data.matches : [];
   const result = {
-    matches: normalizeMatches(Array.isArray(data) ? data : [])
+    matches: normalizeMatches(list)
   };
 
   setCache(cacheKey, result);
@@ -469,8 +453,9 @@ async function getTopScorers(limit = 20, useCache = true) {
   }
 
   const data = await requestApi(buildApiPath('/players/top-scorers', { limit }));
+  const list = Array.isArray(data) ? data : Array.isArray(data?.players) ? data.players : [];
   const result = {
-    players: Array.isArray(data) ? data.map(normalizePlayerStat) : []
+    players: list.map(normalizePlayerStat)
   };
 
   setCache(cacheKey, result);
@@ -489,8 +474,9 @@ async function getTopAssists(limit = 20, useCache = true) {
   }
 
   const data = await requestApi(buildApiPath('/players/top-assists', { limit }));
+  const list = Array.isArray(data) ? data : Array.isArray(data?.players) ? data.players : [];
   const result = {
-    players: Array.isArray(data) ? data.map(normalizePlayerStat) : []
+    players: list.map(normalizePlayerStat)
   };
 
   setCache(cacheKey, result);

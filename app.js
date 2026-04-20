@@ -1,8 +1,9 @@
-const { API_BASE_URL } = require('./utils/env-config');
+﻿const { API_BASE_URL } = require('./utils/env-config');
 
 App({
   globalData: {
     userInfo: null,
+    authToken: '',
     followedTeams: [],
     apiBaseUrl: API_BASE_URL,
     backendApiBaseUrl: API_BASE_URL,
@@ -20,6 +21,7 @@ App({
 
   onLaunch() {
     console.log('App Launch');
+    this.getAuthToken();
     this.loadFollowedTeams();
     this.checkUpdate();
   },
@@ -36,6 +38,53 @@ App({
     console.error('App Error:', msg);
   },
 
+  getAuthToken() {
+    if (this.globalData.authToken) {
+      return this.globalData.authToken;
+    }
+
+    const storageKeys = ['authToken', 'token', 'accessToken'];
+    for (const key of storageKeys) {
+      try {
+        const value = wx.getStorageSync(key);
+        if (typeof value === 'string' && value.trim()) {
+          this.globalData.authToken = value.trim();
+          return this.globalData.authToken;
+        }
+      } catch (error) {
+        console.error('璇诲彇 token 澶辫触:', error);
+      }
+    }
+
+    return '';
+  },
+
+  setAuthToken(token, persist = true) {
+    const nextToken = typeof token === 'string' ? token.trim() : '';
+    this.globalData.authToken = nextToken;
+
+    if (!persist) {
+      return;
+    }
+
+    try {
+      wx.setStorageSync('authToken', nextToken);
+    } catch (error) {
+      console.error('淇濆瓨 token 澶辫触:', error);
+    }
+  },
+
+  clearAuthToken() {
+    this.globalData.authToken = '';
+    ['authToken', 'token', 'accessToken'].forEach((key) => {
+      try {
+        wx.removeStorageSync(key);
+      } catch (error) {
+        console.error('娓呯悊 token 澶辫触:', error);
+      }
+    });
+  },
+
   getCacheStorageKey(key) {
     return `${this.globalData.cachePrefix}${key}`;
   },
@@ -47,7 +96,7 @@ App({
         this.globalData.followedTeams = JSON.parse(followed);
       }
     } catch (e) {
-      console.error('加载关注球队失败:', e);
+      console.error('鍔犺浇鍏虫敞鐞冮槦澶辫触:', e);
     }
   },
 
@@ -55,7 +104,7 @@ App({
     try {
       wx.setStorageSync('followedTeams', JSON.stringify(this.globalData.followedTeams));
     } catch (e) {
-      console.error('保存关注球队失败:', e);
+      console.error('淇濆瓨鍏虫敞鐞冮槦澶辫触:', e);
     }
   },
 
@@ -98,7 +147,7 @@ App({
           this.globalData.cache[cacheTimeKey] = time;
         }
       } catch (e) {
-        console.error('读取缓存失败:', e);
+        console.error('璇诲彇缂撳瓨澶辫触:', e);
       }
     }
 
@@ -113,7 +162,7 @@ App({
       try {
         wx.removeStorageSync(this.getCacheStorageKey(key));
       } catch (e) {
-        console.error('删除过期缓存失败:', e);
+        console.error('鍒犻櫎杩囨湡缂撳瓨澶辫触:', e);
       }
       return null;
     }
@@ -133,7 +182,7 @@ App({
     try {
       wx.setStorageSync(this.getCacheStorageKey(key), { data, time });
     } catch (e) {
-      console.error('写入缓存失败:', e);
+      console.error('鍐欏叆缂撳瓨澶辫触:', e);
     }
   },
 
@@ -187,13 +236,13 @@ App({
       const updateManager = wx.getUpdateManager();
 
       updateManager.onCheckForUpdate((res) => {
-        console.log('检查更新:', res.hasUpdate);
+        console.log('妫€鏌ユ洿鏂?', res.hasUpdate);
       });
 
       updateManager.onUpdateReady(() => {
         wx.showModal({
-          title: '更新提示',
-          content: '新版本已经准备好，是否重启应用？',
+          title: '鏇存柊鎻愮ず',
+          content: '鏂扮増鏈凡缁忓噯澶囧ソ锛屾槸鍚﹂噸鍚簲鐢紵',
           success: (res) => {
             if (res.confirm) {
               updateManager.applyUpdate();
@@ -203,7 +252,7 @@ App({
       });
 
       updateManager.onUpdateFailed(() => {
-        console.error('新版本下载失败');
+        console.error('热更新下载失败，请重试');
       });
     }
   }

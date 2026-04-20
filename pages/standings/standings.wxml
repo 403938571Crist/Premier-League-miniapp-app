@@ -21,23 +21,23 @@
     duration="280"
     bindchange="onSwiperChange">
 
-    <!-- 总积分榜 -->
+    <!-- STANDINGS -->
     <swiper-item>
       <scroll-view class="pane-scroll" scroll-y enhanced show-scrollbar="{{false}}">
         <view class="swiper-pane">
           <view class="table-card">
             <view class="table-header">
-              <view class="header-position">排名</view>
-              <view class="header-team">球队</view>
+              <view class="header-position">Rank</view>
+              <view class="header-team">Team</view>
               <view class="header-stats">
-                <view class="header-stat">赛</view>
-                <view class="header-stat">净</view>
-                <view class="header-stat points">分</view>
+                <view class="header-stat">Pts</view>
+                <view class="header-stat">W</view>
+                <view class="header-stat points">L</view>
               </view>
             </view>
 
             <view class="cache-tip" wx:if="{{activeTab === 'TOTAL' && isCached}}">
-              <text>数据来自缓存 · {{cacheTime}}</text>
+              <text>Cached {{cacheTime}}</text>
             </view>
 
             <view class="standings-list" wx:if="{{standings.length > 0}}">
@@ -54,7 +54,7 @@
               title="{{tabs[0].emptyTitle}}"
               description="{{tabs[0].emptyDescription}}"
               show-action="{{true}}"
-              action-text="重新加载"
+              action-text="Retry"
               bind:action="loadData">
             </empty-state>
           </view>
@@ -63,42 +63,42 @@
         <view class="legend">
           <view class="legend-item">
             <view class="legend-color champion"></view>
-            <text class="legend-text">冠军</text>
+            <text class="legend-text">Champion</text>
           </view>
           <view class="legend-item">
             <view class="legend-color champions-league"></view>
-            <text class="legend-text">欧冠区</text>
+            <text class="legend-text">Champions League</text>
           </view>
           <view class="legend-item">
             <view class="legend-color europa-league"></view>
-            <text class="legend-text">欧战区</text>
+            <text class="legend-text">Europa League</text>
           </view>
           <view class="legend-item">
             <view class="legend-color relegation"></view>
-            <text class="legend-text">降级区</text>
+            <text class="legend-text">Relegation</text>
           </view>
         </view>
 
         <view class="data-source">
-          <text>数据来源于后端 /api 聚合服务</text>
+          <text>Data source: backend API</text>
         </view>
       </scroll-view>
     </swiper-item>
 
-    <!-- 射手榜 -->
+    <!-- TOP SCORERS -->
     <swiper-item>
       <scroll-view class="pane-scroll" scroll-y enhanced show-scrollbar="{{false}}">
         <view class="swiper-pane">
           <view class="table-card">
             <view class="player-table-header">
-              <view class="player-rank-head">排名</view>
-              <view class="player-name-head">球员</view>
-              <view class="player-number-head main">进球</view>
-              <view class="player-number-head">助攻</view>
+              <view class="player-rank-head">Rank</view>
+              <view class="player-name-head">Player</view>
+              <view class="player-number-head main">Goals</view>
+              <view class="player-number-head">Assists</view>
             </view>
 
             <view class="cache-tip" wx:if="{{activeTab === 'SCORERS' && isCached}}">
-              <text>数据来自缓存 · {{cacheTime}}</text>
+              <text>Cached {{cacheTime}}</text>
             </view>
 
             <view class="player-rank-list" wx:if="{{scorers.length > 0}}">
@@ -119,32 +119,32 @@
               title="{{tabs[1].emptyTitle}}"
               description="{{tabs[1].emptyDescription}}"
               show-action="{{true}}"
-              action-text="重新加载"
+              action-text="Retry"
               bind:action="loadData">
             </empty-state>
           </view>
         </view>
 
         <view class="data-source">
-          <text>数据来源于后端 /api 聚合服务</text>
+          <text>Data source: backend API</text>
         </view>
       </scroll-view>
     </swiper-item>
 
-    <!-- 助攻榜 -->
+    <!-- TOP ASSISTS -->
     <swiper-item>
       <scroll-view class="pane-scroll" scroll-y enhanced show-scrollbar="{{false}}">
         <view class="swiper-pane">
           <view class="table-card">
             <view class="player-table-header">
-              <view class="player-rank-head">排名</view>
-              <view class="player-name-head">球员</view>
-              <view class="player-number-head main">助攻</view>
-              <view class="player-number-head">进球</view>
+              <view class="player-rank-head">Rank</view>
+              <view class="player-name-head">Player</view>
+              <view class="player-number-head main">Assists</view>
+              <view class="player-number-head">Goals</view>
             </view>
 
             <view class="cache-tip" wx:if="{{activeTab === 'ASSISTS' && isCached}}">
-              <text>数据来自缓存 · {{cacheTime}}</text>
+              <text>Cached {{cacheTime}}</text>
             </view>
 
             <view class="player-rank-list" wx:if="{{assists.length > 0}}">
@@ -165,14 +165,14 @@
               title="{{tabs[2].emptyTitle}}"
               description="{{tabs[2].emptyDescription}}"
               show-action="{{true}}"
-              action-text="重新加载"
+              action-text="Retry"
               bind:action="loadData">
             </empty-state>
           </view>
         </view>
 
         <view class="data-source">
-          <text>数据来源于后端 /api 聚合服务</text>
+          <text>Data source: backend API</text>
         </view>
       </scroll-view>
     </swiper-item>

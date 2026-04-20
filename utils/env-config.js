@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Environment config
  *
  * Rules:
@@ -9,9 +9,13 @@
 
 const MANUAL_PROD = null;
 
-const PROD_BASE_URL = 'https://你的云托管域名/api';
+const PROD_BASE_URL = 'https://your-domain.example.com/api';
 const DEVTOOLS_BASE_URL = 'http://localhost:8080/api';
 const DEVICE_BASE_URL = 'http://192.168.0.24:8080/api';
+const REQUEST_TIMEOUT = 12000;
+const REQUEST_RETRY_COUNT = 1;
+const REQUEST_RETRY_DELAY = 350;
+const AUTH_TOKEN_STORAGE_KEYS = ['authToken', 'token', 'accessToken'];
 
 function getMiniProgramEnvVersion() {
   try {
@@ -43,5 +47,9 @@ module.exports = {
   isProduction,
   PROD_BASE_URL,
   DEVTOOLS_BASE_URL,
-  DEVICE_BASE_URL
+  DEVICE_BASE_URL,
+  REQUEST_TIMEOUT,
+  REQUEST_RETRY_COUNT,
+  REQUEST_RETRY_DELAY,
+  AUTH_TOKEN_STORAGE_KEYS
 };

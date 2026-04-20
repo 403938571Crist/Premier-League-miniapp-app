@@ -23,6 +23,10 @@ const MEDIA_TYPE_LABEL_MAP = {
   live: '直播'
 };
 
+const DENSE_PARAGRAPH_SOFT_LIMIT = 88;
+const DENSE_PARAGRAPH_HARD_LIMIT = 140;
+const MAX_SENTENCES_PER_PARAGRAPH = 3;
+
 function mapMediaType(type) {
   if (!type) return '图文';
   const key = String(type).toLowerCase();
@@ -37,6 +41,30 @@ function blocksFullText(blocks) {
     if (b.type === 'bullet' && Array.isArray(b.items)) return b.items.join(' ');
     return '';
   }).join(' ');
+}
+
+function removeLeadingRepeatedText(blocks, repeatedText) {
+  if (!Array.isArray(blocks) || !blocks.length || !repeatedText) {
+    return blocks;
+  }
+
+  const firstBlock = blocks[0];
+  if (!firstBlock || firstBlock.type !== 'paragraph' || !firstBlock.text) {
+    return blocks;
+  }
+
+  const repeated = String(repeatedText).trim();
+  const firstText = String(firstBlock.text).trim();
+  if (!repeated || !firstText.startsWith(repeated)) {
+    return blocks;
+  }
+
+  const remainingText = firstText.slice(repeated.length).trim();
+  if (!remainingText) {
+    return blocks.slice(1);
+  }
+
+  return [{ ...firstBlock, text: remainingText }, ...blocks.slice(1)];
 }
 
 function extractLede(summary) {
@@ -57,6 +85,65 @@ function splitParagraph(text) {
   return parts.length ? parts : [String(text).trim()];
 }
 
+function splitSentences(text) {
+  if (!text) return [];
+  const matches = String(text).match(/[^。！？!?；;]+[。！？!?；;]?/g);
+  return (matches || [String(text)])
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function splitDenseParagraph(text) {
+  const normalized = String(text || '').trim();
+  if (!normalized) return [];
+  if (normalized.length <= DENSE_PARAGRAPH_HARD_LIMIT) {
+    return [normalized];
+  }
+
+  const sentences = splitSentences(normalized);
+  if (sentences.length <= 1) {
+    return [normalized];
+  }
+
+  const chunks = [];
+  let current = [];
+  let currentLength = 0;
+
+  const flush = () => {
+    if (!current.length) {
+      return;
+    }
+    chunks.push(current.join(''));
+    current = [];
+    currentLength = 0;
+  };
+
+  sentences.forEach((sentence) => {
+    const nextLength = currentLength + sentence.length;
+    const shouldFlushBeforeAppend = current.length > 0 && (
+      nextLength > DENSE_PARAGRAPH_HARD_LIMIT
+      || (current.length >= 2 && currentLength >= DENSE_PARAGRAPH_SOFT_LIMIT)
+    );
+
+    if (shouldFlushBeforeAppend) {
+      flush();
+    }
+
+    current.push(sentence);
+    currentLength += sentence.length;
+
+    const shouldFlushAfterAppend = currentLength >= DENSE_PARAGRAPH_HARD_LIMIT
+      || (current.length >= MAX_SENTENCES_PER_PARAGRAPH && currentLength >= DENSE_PARAGRAPH_SOFT_LIMIT);
+
+    if (shouldFlushAfterAppend) {
+      flush();
+    }
+  });
+
+  flush();
+  return chunks.length ? chunks : [normalized];
+}
+
 function looksLikeBulletLine(line) {
   if (!line) return false;
   return /^[\-·•●○]\s+/.test(line) || /[（(][^）)]{2,}[）)]\s*[:：]/.test(line);
@@ -68,7 +155,7 @@ function normalizeBlocks(blocks) {
   blocks.forEach((b) => {
     if (!b) return;
     if (b.type === 'paragraph') {
-      const parts = splitParagraph(b.text);
+      const parts = splitParagraph(b.text).flatMap((part) => splitDenseParagraph(part));
       const bulletGroup = [];
       const flushBullets = () => {
         if (bulletGroup.length) {
@@ -104,6 +191,7 @@ function buildViewModel(article) {
   const summaryInBlocks = hasBlocks && summary && blocksText.replace(/\s+/g, '').includes(summary.replace(/\s+/g, '').slice(0, 40));
 
   const lede = summaryInBlocks ? extractLede(summary) : summary;
+  const blocks = summaryInBlocks ? removeLeadingRepeatedText(normalizedBlocks, summary) : normalizedBlocks;
   const showLede = !!lede;
 
   // contentImages：过滤空值，确保是干净的字符串数组
@@ -113,7 +201,7 @@ function buildViewModel(article) {
 
   return {
     ...article,
-    blocks: normalizedBlocks,
+    blocks,
     mediaTypeLabel: mapMediaType(article.mediaType),
     lede,
     showLede,

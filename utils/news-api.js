@@ -1,74 +1,64 @@
-const { formatDate } = require('./util');
-const { API_BASE_URL } = require('./env-config');
-
-const DEFAULT_API_BASE_URL = API_BASE_URL;
+﻿const { formatDate } = require('./util');
+const { request } = require('./request');
 
 const FILTERED_SOURCE_TYPES = ['bilibili', 'douyin'];
 
 const SOURCE_META = {
   official: {
-    label: '官方资讯',
-    coverLabel: '官方焦点',
+    label: 'Official',
+    coverLabel: 'Official News',
     coverTheme: 'official',
     coverAccent: '#00FF85'
   },
   dongqiudi: {
-    label: '懂球帝',
-    coverLabel: '图文快讯',
+    label: 'Dongqiudi',
+    coverLabel: 'Headline',
     coverTheme: 'dongqiudi',
     coverAccent: '#5B6CFF'
   },
   romano: {
-    label: '罗马诺',
-    coverLabel: '转会快讯',
+    label: 'Romano',
+    coverLabel: 'Digest',
     coverTheme: 'romano',
     coverAccent: '#F5C542'
   },
   x: {
     label: 'X',
-    coverLabel: '社媒快讯',
+    coverLabel: '绀惧獟蹇',
     coverTheme: 'x',
     coverAccent: '#FFFFFF'
   },
   sky: {
     label: 'Sky Sports',
-    coverLabel: '天空体育',
+    coverLabel: 'Sports',
     coverTheme: 'sky',
     coverAccent: '#0099CC'
   },
   guardian: {
     label: 'The Guardian',
-    coverLabel: '卫报深度',
+    coverLabel: 'Guardian',
     coverTheme: 'guardian',
     coverAccent: '#052962'
   },
   reddit: {
-    label: 'Reddit 社区',
-    coverLabel: '球迷热议',
+    label: 'Reddit 绀惧尯',
+    coverLabel: '鐞冭糠鐑',
     coverTheme: 'reddit',
     coverAccent: '#FF4500'
   },
   zhibo8: {
-    label: '直播吧',
-    coverLabel: '直播吧快讯',
+    label: 'Zhibo8',
+    coverLabel: 'Sports',
     coverTheme: 'zhibo8',
     coverAccent: '#E8380D'
   },
   media: {
-    label: '媒体报道',
-    coverLabel: '媒体报道',
+    label: 'Media',
+    coverLabel: 'News',
     coverTheme: 'media',
     coverAccent: '#7A5CFF'
   }
 };
-
-function getApiBaseUrl() {
-  const app = getApp();
-  return app?.globalData?.backendApiBaseUrl
-    || app?.globalData?.newsApiBaseUrl
-    || app?.globalData?.apiBaseUrl
-    || DEFAULT_API_BASE_URL;
-}
 
 function buildQueryString(params = {}) {
   return Object.keys(params)
@@ -106,42 +96,19 @@ function wrapCachedResult(cache, transform = (data) => data) {
   };
 }
 
-function request(path) {
-  return new Promise((resolve, reject) => {
-    wx.request({
-      url: `${getApiBaseUrl()}${path}`,
-      method: 'GET',
-      header: {
-        'Content-Type': 'application/json'
-      },
-      timeout: 10000,
-      success: (res) => {
-        const response = res.data || {};
-
-        if (res.statusCode < 200 || res.statusCode >= 300) {
-          reject(new Error(`HTTP ${res.statusCode}`));
-          return;
-        }
-
-        if (response.code !== 0) {
-          reject(new Error(response.message || 'News request failed'));
-          return;
-        }
-
-        resolve(response.data);
-      },
-      fail: (err) => {
-        console.error('News request failed:', err);
-        reject(new Error('Network request failed'));
-      }
-    });
+function requestNews(path) {
+  return request({
+    path,
+    method: 'GET',
+    errorMessage: 'News request failed',
+    showError: false
   });
 }
 
 function getSourceMeta(sourceType) {
   return SOURCE_META[sourceType] || {
-    label: '英超资讯',
-    coverLabel: '精选资讯',
+    label: 'Soccer',
+    coverLabel: 'News',
     coverTheme: 'media',
     coverAccent: '#38003C'
   };
@@ -182,15 +149,15 @@ function normalizeNewsItem(item = {}) {
   const tags = Array.isArray(item.tags) ? item.tags.filter(Boolean) : [];
 
   return {
-    id: item.id,
-    title: item.title || '',
-    summary: item.summary || '',
+    id: item.id || item.newsId || '',
+    title: item.title || item.headline || '',
+    summary: item.summary || item.description || item.excerpt || '',
     source: item.source || meta.label,
     sourceType: item.sourceType || 'media',
-    mediaType: item.mediaType || '图文',
-    publishedAt: formatPublishedAt(item.publishedAt),
-    publishedAtRaw: item.publishedAt || '',
-    coverImage: item.coverImage || '',
+    mediaType: item.mediaType || '鍥炬枃',
+    publishedAt: formatPublishedAt(item.publishedAt || item.publishTime || item.createdAt),
+    publishedAtRaw: item.publishedAt || item.publishTime || item.createdAt || '',
+    coverImage: item.coverImage || item.imageUrl || item.cover || '',
     tags,
     tag: tags[0] || meta.label,
     hotScore: item.hotScore || 0,
@@ -210,7 +177,7 @@ function normalizeNewsArticle(article = {}) {
     sourceNote: article.sourceNote || '',
     relatedTeamIds: Array.isArray(article.relatedTeamIds) ? article.relatedTeamIds : [],
     relatedPlayerIds: Array.isArray(article.relatedPlayerIds) ? article.relatedPlayerIds : [],
-    blocks: normalizeBlocks(article.blocks, item.summary),
+    blocks: normalizeBlocks(article.blocks || article.contentBlocks, item.summary),
     contentImages: Array.isArray(article.contentImages)
       ? article.contentImages.filter(Boolean)
       : []
@@ -230,12 +197,13 @@ function getNewsList(params = {}, useCache = true) {
     return Promise.resolve(wrapCachedResult(cache));
   }
 
-  return request(`/news${query ? `?${query}` : ''}`).then((data) => {
+  return requestNews(`/news${query ? `?${query}` : ''}`).then((data) => {
+    const list = Array.isArray(data) ? data : Array.isArray(data?.list) ? data.list : Array.isArray(data?.records) ? data.records : [];
     const result = {
-      list: filterNewsItems((data.list || []).map(normalizeNewsItem)),
-      page: data.page || 1,
-      pageSize: data.pageSize || params.pageSize || 10,
-      total: data.total || 0
+      list: filterNewsItems(list.map(normalizeNewsItem)),
+      page: data?.page || data?.current || params.page || 1,
+      pageSize: data?.pageSize || data?.size || params.pageSize || 10,
+      total: data?.total || list.length || 0
     };
 
     setCache(cacheKey, result);
@@ -254,7 +222,7 @@ function getNewsDetail(id, useCache = true) {
     return Promise.resolve(wrapCachedResult(cache));
   }
 
-  return request(`/news/${id}`).then((data) => {
+  return requestNews(`/news/${id}`).then((data) => {
     const result = normalizeNewsArticle(data);
     setCache(cacheKey, result);
     return {
@@ -273,9 +241,10 @@ function getTransferNews(params = {}, useCache = true) {
     return Promise.resolve(wrapCachedResult(cache));
   }
 
-  return request(`/news/transfers${query ? `?${query}` : ''}`).then((data) => {
+  return requestNews(`/news/transfers${query ? `?${query}` : ''}`).then((data) => {
+    const list = Array.isArray(data) ? data : Array.isArray(data?.list) ? data.list : Array.isArray(data?.records) ? data.records : [];
     const result = {
-      list: filterNewsItems((data || []).map(normalizeNewsItem))
+      list: filterNewsItems(list.map(normalizeNewsItem))
     };
 
     setCache(cacheKey, result);
@@ -288,7 +257,7 @@ function getTransferNews(params = {}, useCache = true) {
 
 function getPlayerSocial(params = {}) {
   const query = buildQueryString(params);
-  return request(`/social/players${query ? `?${query}` : ''}`);
+  return requestNews(`/social/players${query ? `?${query}` : ''}`);
 }
 
 module.exports = {

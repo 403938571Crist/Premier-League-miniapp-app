@@ -225,6 +225,28 @@ function normalizePlayer(player = {}) {
   };
 }
 
+function normalizePlayerStat(stat = {}) {
+  const playerName = stat.chineseName || stat.playerName || '';
+  const teamName = stat.teamChineseName || stat.teamShortName || stat.teamName || '';
+
+  return {
+    rank: stat.rank || 0,
+    playerId: stat.playerId || null,
+    playerName,
+    englishName: stat.playerName || '',
+    teamName,
+    teamShortName: stat.teamShortName || stat.teamName || '',
+    teamCrest: stat.teamCrest || '/images/default/team.png',
+    position: stat.chinesePosition || stat.position || '球员',
+    goals: stat.goals || 0,
+    assists: stat.assists || 0,
+    penalties: stat.penalties || 0,
+    playedMatches: stat.playedMatches || 0,
+    photoUrl: stat.photoUrl || '/images/default/player.png',
+    raw: stat
+  };
+}
+
 async function getStandings(type = 'TOTAL', useCache = true) {
   const cacheKey = type === 'TOTAL' ? 'standings' : `standings:${type}`;
   const cache = getCache(cacheKey, useCache);
@@ -438,6 +460,46 @@ async function getPlayerMatches(playerId, limit = 10, useCache = true) {
   };
 }
 
+async function getTopScorers(limit = 20, useCache = true) {
+  const cacheKey = `top_scorers_v2_${limit}`;
+  const cache = getCache(cacheKey, useCache);
+
+  if (cache) {
+    return wrapCachedResult(cache);
+  }
+
+  const data = await requestApi(buildApiPath('/players/top-scorers', { limit }));
+  const result = {
+    players: Array.isArray(data) ? data.map(normalizePlayerStat) : []
+  };
+
+  setCache(cacheKey, result);
+  return {
+    ...cloneData(result),
+    isCached: false
+  };
+}
+
+async function getTopAssists(limit = 20, useCache = true) {
+  const cacheKey = `top_assists_v2_${limit}`;
+  const cache = getCache(cacheKey, useCache);
+
+  if (cache) {
+    return wrapCachedResult(cache);
+  }
+
+  const data = await requestApi(buildApiPath('/players/top-assists', { limit }));
+  const result = {
+    players: Array.isArray(data) ? data.map(normalizePlayerStat) : []
+  };
+
+  setCache(cacheKey, result);
+  return {
+    ...cloneData(result),
+    isCached: false
+  };
+}
+
 async function search(keyword) {
   if (!keyword || !keyword.trim()) {
     return { teams: [], players: [] };
@@ -469,6 +531,8 @@ module.exports = {
   getTeamStats,
   getPlayerDetail,
   getPlayerMatches,
+  getTopScorers,
+  getTopAssists,
   search,
   ERROR_CODES
 };

@@ -49,6 +49,7 @@ Page({
     featuredMatches: [],
     currentFeatured: 0,
     newsItems: [],
+    newsTotal: 0,
     todayDate: '',
     isCached: false,
     cacheTime: '',
@@ -89,6 +90,18 @@ Page({
     });
   },
 
+  getNewsHasMore(newsData, visibleItems = []) {
+    const page = Number(newsData?.page || 1);
+    const pageSize = Number(newsData?.pageSize || NEWS_PAGE_SIZE);
+    const total = Number(newsData?.total || 0);
+
+    if (total > 0) {
+      return page * pageSize < total;
+    }
+
+    return visibleItems.length >= pageSize;
+  },
+
   async loadData(useCache = true) {
     this.setData({ loading: true, error: null, newsPage: 1, newsHasMore: true });
 
@@ -122,15 +135,27 @@ Page({
     }
 
     const newsList = this.prepareNewsItems(newsData?.list || []);
+    const newsPage = Number(newsData?.page || 1);
+    const newsTotal = Number(newsData?.total || 0);
     this.setData({
       loading: false,
       featuredMatches: this.selectFeaturedMatches(fixturesData?.matches || []),
       currentFeatured: 0,
       newsItems: newsList,
-      newsHasMore: newsList.length >= NEWS_PAGE_SIZE,
+      newsPage,
+      newsTotal,
+      newsHasMore: this.getNewsHasMore(newsData, newsList),
       lastLoadedAt: Date.now(),
       ...this.getCacheInfo(fixturesData, newsData)
     });
+  },
+
+  onScrollLower() {
+    if (this.data.newsLoadingMore || !this.data.newsHasMore) {
+      return;
+    }
+
+    this.loadMoreNews();
   },
 
   onReachBottom() {
@@ -148,11 +173,14 @@ Page({
     try {
       const newsData = await getNewsList({ page: nextPage, pageSize: NEWS_PAGE_SIZE }, false);
       const newItems = this.prepareNewsItems(newsData?.list || []);
+      const currentNewsTotal = Number(newsData?.total || this.data.newsTotal || 0);
+      const resolvedPage = Number(newsData?.page || nextPage);
 
       this.setData({
         newsItems: [...this.data.newsItems, ...newItems],
-        newsPage: nextPage,
-        newsHasMore: newItems.length >= NEWS_PAGE_SIZE,
+        newsPage: resolvedPage,
+        newsTotal: currentNewsTotal,
+        newsHasMore: this.getNewsHasMore(newsData, newItems),
         newsLoadingMore: false
       });
     } catch (error) {
@@ -302,8 +330,11 @@ Page({
       return;
     }
 
+    const { width = 0, height = 0 } = e.detail || {};
+    const coverState = width > 0 && height / width > 1.6 ? 'tall' : 'ready';
+
     this.setData({
-      [`newsItems[${index}]._coverState`]: 'ready'
+      [`newsItems[${index}]._coverState`]: coverState
     });
   },
 

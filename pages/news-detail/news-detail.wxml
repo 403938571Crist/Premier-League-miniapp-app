@@ -49,14 +49,25 @@
             <text class="body-bullet-text">{{bullet}}</text>
           </view>
         </view>
-        <view class="body-image" wx:elif="{{item.type === 'image'}}">
-          <image class="body-img" src="{{item.text}}" mode="widthFix" lazy-load></image>
-        </view>
+        <!-- image 类型块已废弃，由 contentImages 承载 -->
       </block>
     </view>
 
     <view class="body no-content" wx:elif="{{!article.showLede}}">
       <text class="no-content-text">点击下方按钮查看完整文章</text>
+    </view>
+
+    <!-- 正文配图 —— contentImages 数组，仅在有内容时渲染 -->
+    <view class="content-images" wx:if="{{article.hasContentImages}}">
+      <image
+        wx:for="{{article.contentImages}}"
+        wx:key="index"
+        class="content-img"
+        src="{{item}}"
+        mode="widthFix"
+        lazy-load
+        show-menu-by-longpress
+      ></image>
     </view>
 
     <view class="meta-row">

@@ -210,7 +210,10 @@ function normalizeNewsArticle(article = {}) {
     sourceNote: article.sourceNote || '',
     relatedTeamIds: Array.isArray(article.relatedTeamIds) ? article.relatedTeamIds : [],
     relatedPlayerIds: Array.isArray(article.relatedPlayerIds) ? article.relatedPlayerIds : [],
-    blocks: normalizeBlocks(article.blocks, item.summary)
+    blocks: normalizeBlocks(article.blocks, item.summary),
+    contentImages: Array.isArray(article.contentImages)
+      ? article.contentImages.filter(Boolean)
+      : []
   };
 }
 

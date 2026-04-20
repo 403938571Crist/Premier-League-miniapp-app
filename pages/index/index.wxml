@@ -9,62 +9,64 @@
   </error-state>
 
   <block wx:else>
-    <view class="featured-section" wx:if="{{featuredMatches.length > 0}}">
-      <view class="featured-shell">
-        <swiper
-          class="featured-swiper"
-          current="{{currentFeatured}}"
-          bindchange="onFeaturedChange"
-          indicator-dots="{{false}}"
-          autoplay="{{false}}"
-          circular="{{false}}"
-          duration="220">
-          <swiper-item wx:for="{{featuredMatches}}" wx:key="id">
-            <view class="featured-card-wrap">
-              <match-card
-                match="{{item}}"
-                is-highlight="{{true}}"
-                bind:tap="onMatchTap">
-              </match-card>
+
+    <!-- 顶部固定区：比赛卡 + 快捷入口 -->
+    <view class="top-section">
+      <view class="featured-section" wx:if="{{featuredMatches.length > 0}}">
+        <view class="featured-shell">
+          <swiper
+            class="featured-swiper"
+            current="{{currentFeatured}}"
+            bindchange="onFeaturedChange"
+            indicator-dots="{{false}}"
+            autoplay="{{false}}"
+            circular="{{false}}"
+            duration="220">
+            <swiper-item wx:for="{{featuredMatches}}" wx:key="id">
+              <view class="featured-card-wrap">
+                <match-card
+                  match="{{item}}"
+                  is-highlight="{{true}}"
+                  bind:tap="onMatchTap">
+                </match-card>
+              </view>
+            </swiper-item>
+          </swiper>
+          <view class="featured-pagination" wx:if="{{featuredMatches.length > 1}}">
+            <view
+              wx:for="{{featuredMatches}}"
+              wx:key="id"
+              class="featured-dot {{index === currentFeatured ? 'is-active' : ''}}">
             </view>
-          </swiper-item>
-        </swiper>
-        <view class="featured-pagination" wx:if="{{featuredMatches.length > 1}}">
-          <view
-            wx:for="{{featuredMatches}}"
-            wx:key="id"
-            class="featured-dot {{index === currentFeatured ? 'is-active' : ''}}">
           </view>
         </view>
       </view>
-    </view>
 
-    <view class="quick-access">
-      <view class="quick-item" bindtap="goToStandings">
-        <view class="quick-icon-wrap">
-          <pl-icon name="fb/trophy" size="{{42}}" color="#38003C"></pl-icon>
+      <view class="quick-access">
+        <view class="quick-item" bindtap="goToStandings">
+          <view class="quick-icon-wrap">
+            <pl-icon name="fb/trophy" size="{{42}}" color="#38003C"></pl-icon>
+          </view>
+          <text class="quick-text">积分榜</text>
+          <text class="quick-subtext">实时排名</text>
         </view>
-        <text class="quick-text">积分榜</text>
-        <text class="quick-subtext">实时排名</text>
-      </view>
-      <view class="quick-item" bindtap="goToFixtures">
-        <view class="quick-icon-wrap">
-          <pl-icon name="nav/schedule" size="{{42}}" color="#38003C"></pl-icon>
+        <view class="quick-item" bindtap="goToFixtures">
+          <view class="quick-icon-wrap">
+            <pl-icon name="nav/schedule" size="{{42}}" color="#38003C"></pl-icon>
+          </view>
+          <text class="quick-text">赛程</text>
+          <text class="quick-subtext">比赛日历</text>
         </view>
-        <text class="quick-text">赛程</text>
-        <text class="quick-subtext">比赛日历</text>
-      </view>
-      <view class="quick-item" bindtap="goToTeams">
-        <view class="quick-icon-wrap">
-          <pl-icon name="fb/jersey" size="{{42}}" color="#38003C"></pl-icon>
+        <view class="quick-item" bindtap="goToTeams">
+          <view class="quick-icon-wrap">
+            <pl-icon name="fb/jersey" size="{{42}}" color="#38003C"></pl-icon>
+          </view>
+          <text class="quick-text">球队</text>
+          <text class="quick-subtext">俱乐部档案</text>
         </view>
-        <text class="quick-text">球队</text>
-        <text class="quick-subtext">俱乐部档案</text>
       </view>
-    </view>
 
-    <view class="section">
-      <view class="section-header">
+      <view class="news-section-header">
         <view class="section-title">
           <pl-icon name="ct/article" size="{{32}}" color="#38003C"></pl-icon>
           <text>英超资讯</text>
@@ -74,6 +76,16 @@
       <view class="cache-tip" wx:if="{{isCached}}">
         <text>数据来自缓存 · {{cacheTime}}</text>
       </view>
+    </view>
+
+    <!-- 新闻列表：scroll-view 填满剩余高度 -->
+    <scroll-view
+      class="news-scroll"
+      scroll-y
+      enhanced
+      show-scrollbar="{{false}}"
+      bindscrolltolower="onScrollLower"
+      lower-threshold="{{120}}">
 
       <view class="news-list" wx:if="{{newsItems.length > 0}}">
         <view
@@ -82,7 +94,7 @@
           wx:key="id"
           bindtap="onNewsTap"
           data-id="{{item.id}}">
-          <view class="news-cover news-cover-image-shell news-cover-{{item._coverThemeResolved}} {{item._coverState === 'ready' ? 'news-cover-live' : 'news-cover-placeholder-shell'}}">
+          <view class="news-cover news-cover-image-shell news-cover-{{item._coverThemeResolved}} {{item._coverState === 'ready' ? 'news-cover-live' : (item._coverState === 'tall' ? 'news-cover-tall-shell' : 'news-cover-placeholder-shell')}}">
             <view class="news-cover-placeholder">
               <view class="news-cover-placeholder-badge">
                 <pl-icon name="ct/article" size="{{28}}" color="#FFFFFF"></pl-icon>
@@ -90,15 +102,27 @@
               <text class="news-cover-placeholder-source">{{item.source || 'Premier League'}}</text>
             </view>
             <image
-              wx:if="{{item.coverImage}}"
+              wx:if="{{item.coverImage && item._coverState !== 'tall'}}"
               class="news-cover-img {{item._coverState === 'ready' ? 'is-ready' : 'is-hidden'}}"
               src="{{item.coverImage}}"
-              mode="widthFix"
+              mode="aspectFill"
               bindload="onNewsImageLoad"
               binderror="onNewsImageError"
               data-index="{{index}}"
               lazy-load>
             </image>
+            <view wx:if="{{item.coverImage && item._coverState === 'tall'}}" class="news-cover-tall-card">
+              <image
+                class="news-cover-tall-preview"
+                src="{{item.coverImage}}"
+                mode="aspectFit"
+                lazy-load>
+              </image>
+              <view class="news-cover-tall-copy">
+                <text class="news-cover-tall-source">{{item.source || item.coverLabel}}</text>
+                <text class="news-cover-tall-title">{{item.title}}</text>
+              </view>
+            </view>
             <view class="news-cover-overlay">
               <view class="news-cover-top">
                 <text class="news-cover-chip">{{item.tag}}</text>
@@ -134,6 +158,10 @@
         title="暂无资讯"
         description="稍后再来看最新英超动态">
       </empty-state>
-    </view>
+
+      <!-- 底部留白，防止内容藏在 tab 栏下面 -->
+      <view class="scroll-bottom-safe"></view>
+    </scroll-view>
+
   </block>
 </view>

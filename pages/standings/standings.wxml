@@ -10,24 +10,20 @@
     </view>
   </view>
 
-  <view class="hero-card">
-    <text class="hero-title">{{activeTabMeta.title}}</text>
-    <text class="hero-description">{{activeTabMeta.description}}</text>
-  </view>
+  <loading-state wx:if="{{loading}}" class="flex-fill"></loading-state>
 
-  <loading-state wx:if="{{loading && activeTab === 'TOTAL' && !standings.length}}"></loading-state>
+  <error-state wx:elif="{{error}}" class="flex-fill" bind:retry="loadData"></error-state>
 
-  <error-state wx:elif="{{error && activeTab === 'TOTAL'}}" bind:retry="loadData"></error-state>
+  <swiper
+    wx:else
+    class="rank-swiper"
+    current="{{currentTabIndex}}"
+    duration="280"
+    bindchange="onSwiperChange">
 
-  <block wx:else>
-    <swiper
-      class="rank-swiper"
-      current="{{currentTabIndex}}"
-      duration="280"
-      previous-margin="0rpx"
-      next-margin="0rpx"
-      bindchange="onSwiperChange">
-      <swiper-item>
+    <!-- 总积分榜 -->
+    <swiper-item>
+      <scroll-view class="pane-scroll" scroll-y enhanced show-scrollbar="{{false}}">
         <view class="swiper-pane">
           <view class="table-card">
             <view class="table-header">
@@ -40,7 +36,7 @@
               </view>
             </view>
 
-            <view class="cache-tip" wx:if="{{isCached}}">
+            <view class="cache-tip" wx:if="{{activeTab === 'TOTAL' && isCached}}">
               <text>数据来自缓存 · {{cacheTime}}</text>
             </view>
 
@@ -55,62 +51,131 @@
 
             <empty-state
               wx:else
-              title="暂无总榜数据"
-              description="稍后再试或下拉刷新"
+              title="{{tabs[0].emptyTitle}}"
+              description="{{tabs[0].emptyDescription}}"
               show-action="{{true}}"
               action-text="重新加载"
               bind:action="loadData">
             </empty-state>
           </view>
         </view>
-      </swiper-item>
 
-      <swiper-item>
-        <view class="swiper-pane">
-          <view class="placeholder-card">
-            <view class="placeholder-badge">
-              <text>{{tabs[1].label}}</text>
-            </view>
-            <text class="placeholder-title">{{tabs[1].emptyTitle}}</text>
-            <text class="placeholder-description">{{tabs[1].emptyDescription}}</text>
+        <view class="legend">
+          <view class="legend-item">
+            <view class="legend-color champion"></view>
+            <text class="legend-text">冠军</text>
+          </view>
+          <view class="legend-item">
+            <view class="legend-color champions-league"></view>
+            <text class="legend-text">欧冠区</text>
+          </view>
+          <view class="legend-item">
+            <view class="legend-color europa-league"></view>
+            <text class="legend-text">欧战区</text>
+          </view>
+          <view class="legend-item">
+            <view class="legend-color relegation"></view>
+            <text class="legend-text">降级区</text>
           </view>
         </view>
-      </swiper-item>
 
-      <swiper-item>
+        <view class="data-source">
+          <text>数据来源于后端 /api 聚合服务</text>
+        </view>
+      </scroll-view>
+    </swiper-item>
+
+    <!-- 射手榜 -->
+    <swiper-item>
+      <scroll-view class="pane-scroll" scroll-y enhanced show-scrollbar="{{false}}">
         <view class="swiper-pane">
-          <view class="placeholder-card">
-            <view class="placeholder-badge">
-              <text>{{tabs[2].label}}</text>
+          <view class="table-card">
+            <view class="player-table-header">
+              <view class="player-rank-head">排名</view>
+              <view class="player-name-head">球员</view>
+              <view class="player-number-head main">进球</view>
+              <view class="player-number-head">助攻</view>
             </view>
-            <text class="placeholder-title">{{tabs[2].emptyTitle}}</text>
-            <text class="placeholder-description">{{tabs[2].emptyDescription}}</text>
+
+            <view class="cache-tip" wx:if="{{activeTab === 'SCORERS' && isCached}}">
+              <text>数据来自缓存 · {{cacheTime}}</text>
+            </view>
+
+            <view class="player-rank-list" wx:if="{{scorers.length > 0}}">
+              <view class="player-rank-row" wx:for="{{scorers}}" wx:key="playerId">
+                <view class="player-rank {{index === 0 || index === 1 || index === 2 ? 'top' : ''}}">{{item.rank}}</view>
+                <image class="player-avatar" src="{{item.photoUrl}}" mode="aspectFill" binderror="onAvatarError" data-list="scorers" data-idx="{{index}}"></image>
+                <view class="player-info">
+                  <text class="player-name">{{item.playerName}}</text>
+                  <text class="player-meta">{{item.teamName}} · {{item.position}}</text>
+                </view>
+                <view class="player-stat main">{{item.goals}}</view>
+                <view class="player-stat">{{item.assists}}</view>
+              </view>
+            </view>
+
+            <empty-state
+              wx:else
+              title="{{tabs[1].emptyTitle}}"
+              description="{{tabs[1].emptyDescription}}"
+              show-action="{{true}}"
+              action-text="重新加载"
+              bind:action="loadData">
+            </empty-state>
           </view>
         </view>
-      </swiper-item>
-    </swiper>
 
-    <view class="legend" wx:if="{{activeTab === 'TOTAL'}}">
-      <view class="legend-item">
-        <view class="legend-color champion"></view>
-        <text class="legend-text">冠军</text>
-      </view>
-      <view class="legend-item">
-        <view class="legend-color champions-league"></view>
-        <text class="legend-text">欧冠区</text>
-      </view>
-      <view class="legend-item">
-        <view class="legend-color europa-league"></view>
-        <text class="legend-text">欧战区</text>
-      </view>
-      <view class="legend-item">
-        <view class="legend-color relegation"></view>
-        <text class="legend-text">降级区</text>
-      </view>
-    </view>
+        <view class="data-source">
+          <text>数据来源于后端 /api 聚合服务</text>
+        </view>
+      </scroll-view>
+    </swiper-item>
 
-    <view class="data-source">
-      <text>数据来源于后端 /api 聚合服务</text>
-    </view>
-  </block>
+    <!-- 助攻榜 -->
+    <swiper-item>
+      <scroll-view class="pane-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+        <view class="swiper-pane">
+          <view class="table-card">
+            <view class="player-table-header">
+              <view class="player-rank-head">排名</view>
+              <view class="player-name-head">球员</view>
+              <view class="player-number-head main">助攻</view>
+              <view class="player-number-head">进球</view>
+            </view>
+
+            <view class="cache-tip" wx:if="{{activeTab === 'ASSISTS' && isCached}}">
+              <text>数据来自缓存 · {{cacheTime}}</text>
+            </view>
+
+            <view class="player-rank-list" wx:if="{{assists.length > 0}}">
+              <view class="player-rank-row" wx:for="{{assists}}" wx:key="playerId">
+                <view class="player-rank {{index === 0 || index === 1 || index === 2 ? 'top' : ''}}">{{item.rank}}</view>
+                <image class="player-avatar" src="{{item.photoUrl}}" mode="aspectFill" binderror="onAvatarError" data-list="assists" data-idx="{{index}}"></image>
+                <view class="player-info">
+                  <text class="player-name">{{item.playerName}}</text>
+                  <text class="player-meta">{{item.teamName}} · {{item.position}}</text>
+                </view>
+                <view class="player-stat main">{{item.assists}}</view>
+                <view class="player-stat">{{item.goals}}</view>
+              </view>
+            </view>
+
+            <empty-state
+              wx:else
+              title="{{tabs[2].emptyTitle}}"
+              description="{{tabs[2].emptyDescription}}"
+              show-action="{{true}}"
+              action-text="重新加载"
+              bind:action="loadData">
+            </empty-state>
+          </view>
+        </view>
+
+        <view class="data-source">
+          <text>数据来源于后端 /api 聚合服务</text>
+        </view>
+      </scroll-view>
+    </swiper-item>
+
+  </swiper>
 </view>

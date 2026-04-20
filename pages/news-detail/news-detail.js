@@ -87,9 +87,10 @@ function normalizeBlocks(blocks) {
       flushBullets();
     } else if (b.type === 'bullet' && Array.isArray(b.items)) {
       out.push({ type: 'bullet', items: b.items.filter(Boolean) });
-    } else {
+    } else if (b.type === 'quote') {
       out.push(b);
     }
+    // image 块不再出现在 blocks 里（由 contentImages 单独承载），直接跳过
   });
   return out;
 }
@@ -105,13 +106,20 @@ function buildViewModel(article) {
   const lede = summaryInBlocks ? extractLede(summary) : summary;
   const showLede = !!lede;
 
+  // contentImages：过滤空值，确保是干净的字符串数组
+  const contentImages = Array.isArray(article.contentImages)
+    ? article.contentImages.filter((u) => typeof u === 'string' && u.trim())
+    : [];
+
   return {
     ...article,
     blocks: normalizedBlocks,
     mediaTypeLabel: mapMediaType(article.mediaType),
     lede,
     showLede,
-    hasImage: !!article.coverImage
+    hasImage: !!article.coverImage,
+    contentImages,
+    hasContentImages: contentImages.length > 0
   };
 }
 

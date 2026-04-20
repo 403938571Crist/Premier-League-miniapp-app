@@ -1,4 +1,4 @@
-const { getNewsDetail } = require('../../utils/news-api');
+﻿const { getNewsDetail } = require('../../utils/news-api');
 
 const SOURCE_LABEL_MAP = {
   official: '官方资讯',
@@ -9,7 +9,7 @@ const SOURCE_LABEL_MAP = {
   zhibo8: '直播吧',
   sky: '天空体育',
   guardian: '卫报',
-  reddit: '球迷热议'
+  reddit: 'Reddit 社区'
 };
 
 const MEDIA_TYPE_LABEL_MAP = {
@@ -87,7 +87,7 @@ function splitParagraph(text) {
 
 function splitSentences(text) {
   if (!text) return [];
-  const matches = String(text).match(/[^。！？!?；;]+[。！？!?；;]?/g);
+  const matches = String(text).match(/[^。！？!?]+[。！？!?]?/g);
   return (matches || [String(text)])
     .map((item) => item.trim())
     .filter(Boolean);
@@ -146,7 +146,7 @@ function splitDenseParagraph(text) {
 
 function looksLikeBulletLine(line) {
   if (!line) return false;
-  return /^[\-·•●○]\s+/.test(line) || /[（(][^）)]{2,}[）)]\s*[:：]/.test(line);
+  return /^[\-•●■]\s+/.test(line) || /[（(][^）)]{2,}[）)]\s*[:：]/.test(line);
 }
 
 function normalizeBlocks(blocks) {
@@ -165,7 +165,7 @@ function normalizeBlocks(blocks) {
       };
       parts.forEach((p) => {
         if (looksLikeBulletLine(p)) {
-          bulletGroup.push(p.replace(/^[\-·•●○]\s+/, ''));
+          bulletGroup.push(p.replace(/^[\-•●■]\s+/, ''));
         } else {
           flushBullets();
           out.push({ type: 'paragraph', text: p });
@@ -177,7 +177,6 @@ function normalizeBlocks(blocks) {
     } else if (b.type === 'quote') {
       out.push(b);
     }
-    // image 块不再出现在 blocks 里（由 contentImages 单独承载），直接跳过
   });
   return out;
 }
@@ -193,8 +192,6 @@ function buildViewModel(article) {
   const lede = summaryInBlocks ? extractLede(summary) : summary;
   const blocks = summaryInBlocks ? removeLeadingRepeatedText(normalizedBlocks, summary) : normalizedBlocks;
   const showLede = !!lede;
-
-  // contentImages：过滤空值，确保是干净的字符串数组
   const contentImages = Array.isArray(article.contentImages)
     ? article.contentImages.filter((u) => typeof u === 'string' && u.trim())
     : [];

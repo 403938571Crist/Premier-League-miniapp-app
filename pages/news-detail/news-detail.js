@@ -26,11 +26,41 @@ const MEDIA_TYPE_LABEL_MAP = {
 const DENSE_PARAGRAPH_SOFT_LIMIT = 88;
 const DENSE_PARAGRAPH_HARD_LIMIT = 140;
 const MAX_SENTENCES_PER_PARAGRAPH = 3;
+const UNSUPPORTED_WEBVIEW_HOST_RULES = [
+  { pattern: /(^|\.)bilibili\.com$/i, label: 'B站' },
+  { pattern: /(^|\.)b23\.tv$/i, label: 'B站' },
+  { pattern: /(^|\.)douyin\.com$/i, label: '抖音' },
+  { pattern: /(^|\.)iesdouyin\.com$/i, label: '抖音' }
+];
 
 function mapMediaType(type) {
   if (!type) return '图文';
   const key = String(type).toLowerCase();
   return MEDIA_TYPE_LABEL_MAP[key] || type;
+}
+
+function getUrlHostname(url) {
+  const value = String(url || '').trim();
+  if (!value) {
+    return '';
+  }
+
+  try {
+    return new URL(value).hostname.toLowerCase();
+  } catch (error) {
+    const matched = value.match(/^https?:\/\/([^/?#]+)/i);
+    return matched ? matched[1].toLowerCase() : '';
+  }
+}
+
+function getUnsupportedWebviewSource(url) {
+  const hostname = getUrlHostname(url);
+  if (!hostname) {
+    return '';
+  }
+
+  const matchedRule = UNSUPPORTED_WEBVIEW_HOST_RULES.find((rule) => rule.pattern.test(hostname));
+  return matchedRule ? matchedRule.label : '';
 }
 
 function getCacheTimeText(cachedAt) {
@@ -189,6 +219,27 @@ function normalizeBlocks(blocks) {
   return out;
 }
 
+function dedupeImageUrls(urls = []) {
+  if (!Array.isArray(urls)) {
+    return [];
+  }
+
+  const seen = new Set();
+  return urls.filter((imageUrl) => {
+    if (typeof imageUrl !== 'string') {
+      return false;
+    }
+
+    const url = imageUrl.trim();
+    if (!url || seen.has(url)) {
+      return false;
+    }
+
+    seen.add(url);
+    return true;
+  });
+}
+
 function buildViewModel(article) {
   if (!article) return null;
   const normalizedBlocks = normalizeBlocks(article.blocks);
@@ -199,9 +250,12 @@ function buildViewModel(article) {
 
   const lede = summaryInBlocks ? extractLede(summary) : summary;
   const blocks = summaryInBlocks ? removeLeadingRepeatedText(normalizedBlocks, summary) : normalizedBlocks;
-  const contentImages = Array.isArray(article.contentImages)
-    ? article.contentImages.filter((u) => typeof u === 'string' && u.trim())
-    : [];
+  const contentImages = dedupeImageUrls(
+    Array.isArray(article.contentImages)
+      ? article.contentImages.filter((u) => typeof u === 'string' && u.trim())
+      : []
+  );
+  const unsupportedWebviewSource = getUnsupportedWebviewSource(article.url);
 
   return {
     ...article,
@@ -212,8 +266,19 @@ function buildViewModel(article) {
     hasImage: !!article.coverImage,
     contentImages,
     hasContentImages: contentImages.length > 0,
-    cacheTimeText: article.cachedAt ? getCacheTimeText(article.cachedAt) : ''
+    cacheTimeText: article.cachedAt ? getCacheTimeText(article.cachedAt) : '',
+    unsupportedWebviewSource,
+    openActionText: unsupportedWebviewSource ? '复制原文链接' : '查看完整文章'
   };
+}
+
+function copyLinkWithToast(url, title = '链接已复制') {
+  wx.setClipboardData({
+    data: url,
+    success: () => {
+      wx.showToast({ title, icon: 'success' });
+    }
+  });
 }
 
 Page({
@@ -287,15 +352,42 @@ Page({
     }
   },
 
+  onHeroImageError() {
+    this.setData({ 'article.coverImage': '' });
+  },
+
+  onContentImageError(e) {
+    const index = Number(e?.currentTarget?.dataset?.index);
+    if (!Number.isInteger(index) || index < 0 || !this.data.article?.contentImages?.[index]) {
+      return;
+    }
+
+    this.setData({ [`article.contentImages[${index}]`]: '' });
+  },
+
   onOpenWebview() {
     const { article } = this.data;
     if (!article || !article.url) return;
 
+    if (article.unsupportedWebviewSource) {
+      wx.showModal({
+        title: `${article.unsupportedWebviewSource} 视频暂不支持`,
+        content: `微信内无法稳定播放 ${article.unsupportedWebviewSource} 站内视频，已为你提供复制链接入口。请在浏览器或对应 App 中打开。`,
+        confirmText: '复制链接',
+        cancelText: '取消',
+        success: (res) => {
+          if (res.confirm) {
+            copyLinkWithToast(article.url);
+          }
+        }
+      });
+      return;
+    }
+
     wx.navigateTo({
       url: `/pages/webview/webview?url=${encodeURIComponent(article.url)}&title=${encodeURIComponent(article.title || '')}`,
       fail: () => {
-        wx.setClipboardData({ data: article.url });
-        wx.showToast({ title: '链接已复制', icon: 'success' });
+        copyLinkWithToast(article.url);
       }
     });
   },
@@ -306,7 +398,7 @@ Page({
       wx.showToast({ title: '暂无原文链接', icon: 'none' });
       return;
     }
-    wx.setClipboardData({ data: article.url });
+    copyLinkWithToast(article.url);
   },
 
   onShare() {

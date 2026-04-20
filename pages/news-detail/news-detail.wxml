@@ -7,6 +7,8 @@
       class="hero-img"
       src="{{article.coverImage}}"
       mode="aspectFill"
+      lazy-load
+      binderror="onHeroImageError"
     />
     <view class="hero-scribble"></view>
     <view class="hero-shade"></view>
@@ -69,6 +71,8 @@
         mode="widthFix"
         lazy-load
         show-menu-by-longpress
+        binderror="onContentImageError"
+        data-index="{{index}}"
       ></image>
     </view>
 
@@ -89,7 +93,7 @@
 
     <view class="actions" wx:if="{{article.url}}">
       <view class="btn-primary" bindtap="onOpenWebview">
-        <text class="btn-primary-text">查看完整文章</text>
+        <text class="btn-primary-text">{{article.openActionText}}</text>
         <text class="btn-primary-chev">→</text>
       </view>
       <view class="btn-icon" bindtap="onCopyLink" hover-class="btn-icon-hover">

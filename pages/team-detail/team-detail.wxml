@@ -1,4 +1,4 @@
-<view class="container">
+﻿<view class="container">
   <!-- 加载状态 -->
   <loading-state wx:if="{{loading}}"></loading-state>
 
@@ -12,7 +12,7 @@
   <block wx:else>
     <!-- 球队头部信息 -->
     <view class="team-header">
-      <image class="team-logo" src="{{team.logo}}" mode="aspectFit"></image>
+      <image class="team-logo" src="{{team.logo || '/images/default/team.png'}}" mode="aspectFit" lazy-load></image>
       <text class="team-name">{{team.name}}</text>
       <text class="team-venue" wx:if="{{team.venue}}">{{team.venue}}</text>
       
@@ -95,7 +95,7 @@
         </view>
       </view>
 
-      <!-- 球队简介 -->
+    <!-- 球队简介 -->
       <view class="card" wx:if="{{team.address || team.founded}}">
         <view class="card-title">
           <view class="card-title-icon">
@@ -128,7 +128,7 @@
           <view class="squad-title-icon">
             <pl-icon name="fb/goal" size="20" color="#38003C"></pl-icon>
           </view>
-          <text>门将（{{squad.goalkeepers.length}}）</text>
+        <text>门将（{{squad.goalkeepers.length}}）</text>
         </view>
         <view class="squad-list">
           <player-item 
@@ -146,7 +146,7 @@
           <view class="squad-title-icon">
             <pl-icon name="fb/club" size="20" color="#38003C"></pl-icon>
           </view>
-          <text>后卫（{{squad.defenders.length}}）</text>
+        <text>后卫（{{squad.defenders.length}}）</text>
         </view>
         <view class="squad-list">
           <player-item 
@@ -164,7 +164,7 @@
           <view class="squad-title-icon">
             <pl-icon name="fb/pitch" size="20" color="#38003C"></pl-icon>
           </view>
-          <text>中场（{{squad.midfielders.length}}）</text>
+        <text>中场（{{squad.midfielders.length}}）</text>
         </view>
         <view class="squad-list">
           <player-item 
@@ -182,7 +182,7 @@
           <view class="squad-title-icon">
             <pl-icon name="fb/boot" size="20" color="#38003C"></pl-icon>
           </view>
-          <text>前锋（{{squad.forwards.length}}）</text>
+        <text>前锋（{{squad.forwards.length}}）</text>
         </view>
         <view class="squad-list">
           <player-item 

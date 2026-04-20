@@ -1,1 +1,13 @@
-<web-view src="{{url}}"></web-view>
+<view wx:if="{{unsupported}}" class="fallback-page">
+  <view class="fallback-card">
+    <view class="fallback-title">{{unsupportedSource}} 视频暂不支持</view>
+    <view class="fallback-desc">{{unsupportedMessage}}</view>
+    <view class="fallback-url">{{url}}</view>
+    <view class="fallback-actions">
+      <view class="fallback-btn fallback-btn-primary" bindtap="onCopyLink">复制链接</view>
+      <view class="fallback-btn" bindtap="onBack">返回</view>
+    </view>
+  </view>
+</view>
+
+<web-view wx:else src="{{url}}"></web-view>

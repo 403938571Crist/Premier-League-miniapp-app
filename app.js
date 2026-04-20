@@ -9,6 +9,7 @@ App({
     backendApiBaseUrl: API_BASE_URL,
     newsApiBaseUrl: API_BASE_URL,
     cachePrefix: 'appCache:',
+    lruCaches: {},
     cache: {
       standings: null,
       standingsTime: null,
@@ -52,7 +53,7 @@ App({
           return this.globalData.authToken;
         }
       } catch (error) {
-        console.error('璇诲彇 token 澶辫触:', error);
+        console.error('读取 token 失败:', error);
       }
     }
 
@@ -70,7 +71,7 @@ App({
     try {
       wx.setStorageSync('authToken', nextToken);
     } catch (error) {
-      console.error('淇濆瓨 token 澶辫触:', error);
+      console.error('保存 token 失败:', error);
     }
   },
 
@@ -80,13 +81,99 @@ App({
       try {
         wx.removeStorageSync(key);
       } catch (error) {
-        console.error('娓呯悊 token 澶辫触:', error);
+        console.error('清理 token 失败:', error);
       }
     });
   },
 
   getCacheStorageKey(key) {
     return `${this.globalData.cachePrefix}${key}`;
+  },
+
+  getLruStorageKey(name) {
+    return `${this.globalData.cachePrefix}lru:${name}`;
+  },
+
+  loadLruCache(name) {
+    if (!name) {
+      return [];
+    }
+
+    if (!this.globalData.lruCaches[name]) {
+      let entries = [];
+      try {
+        const stored = wx.getStorageSync(this.getLruStorageKey(name));
+        if (Array.isArray(stored)) {
+          entries = stored.filter((item) => item && item.key && item.value);
+        }
+      } catch (error) {
+        console.error('读取 LRU 缓存失败:', error);
+      }
+
+      this.globalData.lruCaches[name] = entries;
+    }
+
+    return this.globalData.lruCaches[name];
+  },
+
+  saveLruCache(name) {
+    if (!name) {
+      return;
+    }
+
+    try {
+      wx.setStorageSync(this.getLruStorageKey(name), this.globalData.lruCaches[name] || []);
+    } catch (error) {
+      console.error('写入 LRU 缓存失败:', error);
+    }
+  },
+
+  getLruValue(name, key, limit = 100) {
+    if (!name || !key) {
+      return '';
+    }
+
+    const cache = this.loadLruCache(name);
+    const hitIndex = cache.findIndex((item) => item.key === key);
+
+    if (hitIndex === -1) {
+      return '';
+    }
+
+    const [hit] = cache.splice(hitIndex, 1);
+    cache.unshift(hit);
+
+    if (cache.length > limit) {
+      cache.length = limit;
+    }
+
+    this.saveLruCache(name);
+    return hit.value || '';
+  },
+
+  setLruValue(name, key, value, limit = 100) {
+    if (!name || !key || !value) {
+      return;
+    }
+
+    const cache = this.loadLruCache(name);
+    const hitIndex = cache.findIndex((item) => item.key === key);
+
+    if (hitIndex !== -1) {
+      cache.splice(hitIndex, 1);
+    }
+
+    cache.unshift({
+      key,
+      value,
+      updatedAt: Date.now()
+    });
+
+    if (cache.length > limit) {
+      cache.length = limit;
+    }
+
+    this.saveLruCache(name);
   },
 
   loadFollowedTeams() {
@@ -96,7 +183,7 @@ App({
         this.globalData.followedTeams = JSON.parse(followed);
       }
     } catch (e) {
-      console.error('鍔犺浇鍏虫敞鐞冮槦澶辫触:', e);
+      console.error('加载关注球队失败:', e);
     }
   },
 
@@ -104,7 +191,7 @@ App({
     try {
       wx.setStorageSync('followedTeams', JSON.stringify(this.globalData.followedTeams));
     } catch (e) {
-      console.error('淇濆瓨鍏虫敞鐞冮槦澶辫触:', e);
+      console.error('保存关注球队失败:', e);
     }
   },
 
@@ -147,7 +234,7 @@ App({
           this.globalData.cache[cacheTimeKey] = time;
         }
       } catch (e) {
-        console.error('璇诲彇缂撳瓨澶辫触:', e);
+        console.error('读取缓存失败:', e);
       }
     }
 
@@ -162,7 +249,7 @@ App({
       try {
         wx.removeStorageSync(this.getCacheStorageKey(key));
       } catch (e) {
-        console.error('鍒犻櫎杩囨湡缂撳瓨澶辫触:', e);
+        console.error('删除过期缓存失败:', e);
       }
       return null;
     }
@@ -182,7 +269,7 @@ App({
     try {
       wx.setStorageSync(this.getCacheStorageKey(key), { data, time });
     } catch (e) {
-      console.error('鍐欏叆缂撳瓨澶辫触:', e);
+      console.error('写入缓存失败:', e);
     }
   },
 
@@ -207,6 +294,7 @@ App({
   },
 
   clearCache() {
+    this.globalData.lruCaches = {};
     this.globalData.cache = {
       standings: null,
       standingsTime: null,
@@ -236,13 +324,13 @@ App({
       const updateManager = wx.getUpdateManager();
 
       updateManager.onCheckForUpdate((res) => {
-        console.log('妫€鏌ユ洿鏂?', res.hasUpdate);
+        console.log('检查更新:', res.hasUpdate);
       });
 
       updateManager.onUpdateReady(() => {
         wx.showModal({
-          title: '鏇存柊鎻愮ず',
-          content: '鏂扮増鏈凡缁忓噯澶囧ソ锛屾槸鍚﹂噸鍚簲鐢紵',
+          title: '更新提示',
+          content: '新版本已经准备好，是否重启应用？',
           success: (res) => {
             if (res.confirm) {
               updateManager.applyUpdate();

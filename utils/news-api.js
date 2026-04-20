@@ -1,5 +1,6 @@
 ﻿const { formatDate } = require('./util');
 const { request } = require('./request');
+const { normalizeImageUrl, normalizeImageUrlList } = require('./image');
 
 const FILTERED_SOURCE_TYPES = ['bilibili', 'douyin'];
 
@@ -154,12 +155,17 @@ function normalizeContentImages(article = {}) {
   ];
 
   const list = candidates.find((item) => Array.isArray(item)) || [];
-  return list
-    .map((item) => {
-      if (typeof item === 'string') return item;
-      return item?.url || item?.src || item?.imageUrl || '';
-    })
-    .filter(Boolean);
+  return normalizeImageUrlList(
+    list
+      .map((item) => {
+        if (typeof item === 'string') {
+          return item;
+        }
+
+        return item?.url || item?.src || item?.imageUrl || '';
+      }),
+    ''
+  );
 }
 
 function normalizeSourceType(item = {}) {
@@ -193,7 +199,7 @@ function normalizeNewsItem(item = {}) {
     mediaType: item.mediaType || item.contentType || '图文',
     publishedAt: formatPublishedAt(item.publishedAt || item.publishTime || item.createdAt || item.updatedAt),
     publishedAtRaw: item.publishedAt || item.publishTime || item.createdAt || item.updatedAt || '',
-    coverImage: item.coverImage || item.imageUrl || item.cover || item.thumbnail || item.poster || '',
+    coverImage: normalizeImageUrl(item.coverImage || item.imageUrl || item.cover || item.thumbnail || item.poster, ''),
     tags,
     tag: tags[0] || meta.label,
     hotScore: item.hotScore || item.score || 0,

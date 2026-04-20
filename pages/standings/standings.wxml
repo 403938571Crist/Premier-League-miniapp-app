@@ -1,4 +1,4 @@
-<view class="container">
+﻿<view class="container">
   <view class="tab-bar">
     <view
       wx:for="{{tabs}}"
@@ -104,7 +104,7 @@
             <view class="player-rank-list" wx:if="{{scorers.length > 0}}">
               <view class="player-rank-row" wx:for="{{scorers}}" wx:key="playerId">
                 <view class="player-rank {{index === 0 || index === 1 || index === 2 ? 'top' : ''}}">{{item.rank}}</view>
-                <image class="player-avatar" src="{{item.photoUrl}}" mode="aspectFill" binderror="onAvatarError" data-list="scorers" data-idx="{{index}}"></image>
+                <image class="player-avatar" src="{{item.photoUrl || '/images/default/player.png'}}" mode="aspectFill" binderror="onAvatarError" data-list="scorers" data-idx="{{index}}" lazy-load></image>
                 <view class="player-info">
                   <text class="player-name">{{item.playerName}}</text>
                   <text class="player-meta">{{item.teamName}} · {{item.position}}</text>
@@ -150,7 +150,7 @@
             <view class="player-rank-list" wx:if="{{assists.length > 0}}">
               <view class="player-rank-row" wx:for="{{assists}}" wx:key="playerId">
                 <view class="player-rank {{index === 0 || index === 1 || index === 2 ? 'top' : ''}}">{{item.rank}}</view>
-                <image class="player-avatar" src="{{item.photoUrl}}" mode="aspectFill" binderror="onAvatarError" data-list="assists" data-idx="{{index}}"></image>
+                <image class="player-avatar" src="{{item.photoUrl || '/images/default/player.png'}}" mode="aspectFill" binderror="onAvatarError" data-list="assists" data-idx="{{index}}" lazy-load></image>
                 <view class="player-info">
                   <text class="player-name">{{item.playerName}}</text>
                   <text class="player-meta">{{item.teamName}} · {{item.position}}</text>

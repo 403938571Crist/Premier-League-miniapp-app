@@ -4,6 +4,8 @@ const { getNewsList } = require('../../utils/news-api');
 
 const SHOW_REFRESH_INTERVAL = 2 * 60 * 1000;
 const NEWS_PAGE_SIZE = 10;
+const NEWS_COVER_LRU_NAME = 'news-covers';
+const NEWS_COVER_LRU_LIMIT = 120;
 const FEATURED_LOOKAHEAD_DAYS = 10;
 const NEWS_PLACEHOLDER_THEME = 'media';
 const LIVE_STATUSES = ['LIVE', 'IN_PLAY', 'PAUSED'];
@@ -225,12 +227,48 @@ Page({
     return formatDate(new Date(), 'YYYY-MM-DD');
   },
 
+  getNewsCoverCacheKey(item = {}) {
+    return String(
+      item.id
+      || item.url
+      || `${item.sourceType || 'news'}:${item.title || ''}`
+    ).trim();
+  },
+
+  getCachedNewsCover(item = {}) {
+    const cacheKey = this.getNewsCoverCacheKey(item);
+    const app = getApp();
+
+    if (!cacheKey || !app?.getLruValue) {
+      return '';
+    }
+
+    return app.getLruValue(NEWS_COVER_LRU_NAME, cacheKey, NEWS_COVER_LRU_LIMIT) || '';
+  },
+
+  setCachedNewsCover(item = {}, coverImage = '') {
+    const cacheKey = this.getNewsCoverCacheKey(item);
+    const app = getApp();
+
+    if (!cacheKey || !coverImage || !app?.setLruValue) {
+      return;
+    }
+
+    app.setLruValue(NEWS_COVER_LRU_NAME, cacheKey, coverImage, NEWS_COVER_LRU_LIMIT);
+  },
+
   prepareNewsItems(list = []) {
-    return list.map((item) => ({
-      ...item,
-      _coverState: item.coverImage ? 'loading' : 'placeholder',
-      _coverThemeResolved: item.coverTheme || NEWS_PLACEHOLDER_THEME
-    }));
+    return list.map((item) => {
+      const cachedCoverImage = item.coverImage ? '' : this.getCachedNewsCover(item);
+      const resolvedCoverImage = item.coverImage || cachedCoverImage;
+
+      return {
+        ...item,
+        coverImage: resolvedCoverImage,
+        _coverState: resolvedCoverImage ? 'loading' : 'placeholder',
+        _coverThemeResolved: item.coverTheme || NEWS_PLACEHOLDER_THEME
+      };
+    });
   },
 
   getMatchCalendarDate(match) {
@@ -330,6 +368,11 @@ Page({
       return;
     }
 
+    const currentItem = this.data.newsItems[index];
+    if (currentItem?.coverImage) {
+      this.setCachedNewsCover(currentItem, currentItem.coverImage);
+    }
+
     const { width = 0, height = 0 } = e.detail || {};
     const coverState = width > 0 && height / width > 1.6 ? 'tall' : 'ready';
 
@@ -346,6 +389,15 @@ Page({
 
     const currentItem = this.data.newsItems[index];
     if (!currentItem || !currentItem.coverImage) {
+      return;
+    }
+
+    const cachedCover = this.getCachedNewsCover(currentItem);
+    if (cachedCover && cachedCover !== currentItem.coverImage) {
+      this.setData({
+        [`newsItems[${index}].coverImage`]: cachedCover,
+        [`newsItems[${index}]._coverState`]: 'loading'
+      });
       return;
     }
 

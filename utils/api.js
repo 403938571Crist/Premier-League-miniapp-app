@@ -1,5 +1,11 @@
 ﻿const { ERROR_CODES, ERROR_MESSAGES } = require('./constants');
 const { request } = require('./request');
+const {
+  TEAM_DEFAULT_IMAGE,
+  PLAYER_DEFAULT_IMAGE,
+  normalizeImageUrl,
+  normalizeImageUrlWithFallback
+} = require('./image');
 
 function buildQueryString(params = {}) {
   return Object.keys(params)
@@ -16,6 +22,10 @@ function buildApiPath(path, params = {}) {
 
 function cloneData(data) {
   return JSON.parse(JSON.stringify(data));
+}
+
+function normalizeImage(url, fallback) {
+  return normalizeImageUrlWithFallback(url, '', fallback);
 }
 
 function getCache(cacheKey, useCache) {
@@ -76,7 +86,7 @@ function normalizeTeamDetail(team = {}) {
     apiId: source.apiId || source.teamId || source.id || null,
     name: normalizeTeamName(source),
     shortName: source.shortName || source.teamShortName || source.name || '',
-    crest: source.crestUrl || source.crest || '/images/default/team.png',
+    crest: normalizeImageUrlWithFallback(source.crestUrl, source.crest, TEAM_DEFAULT_IMAGE),
     venue: source.venue || '',
     founded: source.founded || null,
     address: source.address || '',
@@ -144,12 +154,12 @@ function normalizeMatch(match = {}) {
     homeTeam: {
       id: match.homeTeamId || homeTeam.id || homeTeam.apiId || null,
       name: match.homeTeamChineseName || match.homeTeamName || homeTeam.chineseName || homeTeam.shortName || homeTeam.name || '',
-      crest: match.homeTeamCrest || homeTeam.crestUrl || homeTeam.crest || '/images/default/team.png'
+      crest: normalizeImageUrlWithFallback(match.homeTeamCrest, homeTeam.crestUrl, TEAM_DEFAULT_IMAGE)
     },
     awayTeam: {
       id: match.awayTeamId || awayTeam.id || awayTeam.apiId || null,
       name: match.awayTeamChineseName || match.awayTeamName || awayTeam.chineseName || awayTeam.shortName || awayTeam.name || '',
-      crest: match.awayTeamCrest || awayTeam.crestUrl || awayTeam.crest || '/images/default/team.png'
+      crest: normalizeImageUrlWithFallback(match.awayTeamCrest, awayTeam.crestUrl, TEAM_DEFAULT_IMAGE)
     },
     score: {
       fullTime: {
@@ -178,8 +188,8 @@ function normalizePlayer(player = {}) {
     name: player.chineseName || player.name || '',
     firstName: player.firstName || '',
     lastName: player.lastName || '',
-    photo: player.photoUrl || '/images/default/player.png',
-    photoUrl: player.photoUrl || '',
+    photo: normalizeImage(player.photoUrl, PLAYER_DEFAULT_IMAGE),
+    photoUrl: normalizeImageUrl(player.photoUrl, ''),
     shirtNumber: player.shirtNumber || '',
     position: player.position || '',
     chinesePosition: player.chinesePosition || '',
@@ -209,13 +219,13 @@ function normalizePlayerStat(stat = {}) {
     englishName: stat.playerName || '',
     teamName,
     teamShortName: stat.teamShortName || stat.teamName || '',
-    teamCrest: stat.teamCrest || '/images/default/team.png',
-    position: stat.chinesePosition || stat.position || '鐞冨憳',
+    teamCrest: normalizeImage(stat.teamCrest, TEAM_DEFAULT_IMAGE),
+    position: stat.chinesePosition || stat.position || '球员',
     goals: stat.goals || 0,
     assists: stat.assists || 0,
     penalties: stat.penalties || 0,
     playedMatches: stat.playedMatches || 0,
-    photoUrl: stat.photoUrl || '/images/default/player.png',
+    photoUrl: normalizeImage(stat.photoUrl, PLAYER_DEFAULT_IMAGE),
     raw: stat
   };
 }

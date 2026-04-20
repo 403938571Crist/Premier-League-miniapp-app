@@ -1,4 +1,4 @@
-<view class="container">
+﻿<view class="container">
   <loading-state wx:if="{{loading}}"></loading-state>
 
   <error-state
@@ -23,7 +23,7 @@
         <view class="team-rank team-rank-empty" wx:else>
           <text>-</text>
         </view>
-        <image class="team-crest" src="{{item.crest}}" mode="aspectFit"></image>
+        <image class="team-crest" src="{{item.crest || '/images/default/team.png'}}" mode="aspectFit" lazy-load></image>
         <text class="team-name">{{item.name}}</text>
         <view class="team-points" wx:if="{{item.points != null}}">
           <text class="points-value">{{item.points}}</text>

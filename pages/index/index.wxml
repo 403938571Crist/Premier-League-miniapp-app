@@ -86,12 +86,14 @@
 
       <view class="news-list" wx:if="{{newsItems.length > 0}}">
         <view
-          class="news-card"
+          class="news-card {{(!item.coverImage || item._coverState === 'loading') ? 'news-card-no-cover' : ''}}"
           wx:for="{{newsItems}}"
           wx:key="id"
           bindtap="onNewsTap"
           data-id="{{item.id}}">
-          <view class="news-cover news-cover-image-shell news-cover-{{item._coverThemeResolved}} {{item._coverState === 'ready' ? 'news-cover-live' : (item._coverState === 'tall' ? 'news-cover-tall-shell' : 'news-cover-placeholder-shell')}}">
+          <view
+            wx:if="{{item.coverImage && (item._coverState === 'ready' || item._coverState === 'tall')}}"
+            class="news-cover news-cover-image-shell news-cover-{{item._coverThemeResolved}} {{item._coverState === 'ready' ? 'news-cover-live' : (item._coverState === 'tall' ? 'news-cover-tall-shell' : 'news-cover-placeholder-shell')}}">
             <view class="news-cover-placeholder">
               <view class="news-cover-placeholder-badge">
                 <pl-icon name="ct/article" size="{{28}}" color="#FFFFFF"></pl-icon>
@@ -126,7 +128,16 @@
               </view>
             </view>
           </view>
-          <view class="news-card-body">
+          <image
+            wx:if="{{item.coverImage && item._coverState === 'loading'}}"
+            class="news-cover-preload"
+            src="{{item.coverImage}}"
+            mode="aspectFill"
+            bindload="onNewsImageLoad"
+            binderror="onNewsImageError"
+            data-index="{{index}}">
+          </image>
+          <view class="news-card-body {{(!item.coverImage || item._coverState === 'loading') ? 'news-card-body-no-cover' : ''}}">
             <view class="news-card-head">
               <text class="news-tag">{{item.source}}</text>
               <text class="news-date">{{item.publishedAt}}</text>

@@ -4,6 +4,24 @@
 
 const { TEAM_SHORT_NAMES, MATCH_STATUS_TEXT, MATCH_STATUS_STYLE, STANDING_ZONES, PLAYER_POSITIONS } = require('./constants');
 
+function normalizeTeamNameKey(name = '') {
+  return String(name)
+    .trim()
+    .toLowerCase()
+    .replace(/[\s\-_&.'"]/g, '');
+}
+
+const TEAM_NAME_ALIASES = (() => {
+  const map = {};
+  Object.keys(TEAM_SHORT_NAMES).forEach((name) => {
+    const key = normalizeTeamNameKey(name);
+    if (key && !map[key]) {
+      map[key] = TEAM_SHORT_NAMES[name];
+    }
+  });
+  return map;
+})();
+
 /**
  * 格式化日期
  * @param {string|Date} date - 日期
@@ -65,7 +83,12 @@ function formatTime(time) {
  * @returns {string}
  */
 function getTeamName(name) {
-  return TEAM_SHORT_NAMES[name] || name;
+  if (!name) return '';
+  if (TEAM_SHORT_NAMES[name]) {
+    return TEAM_SHORT_NAMES[name];
+  }
+  const key = normalizeTeamNameKey(name);
+  return TEAM_NAME_ALIASES[key] || name;
 }
 
 /**

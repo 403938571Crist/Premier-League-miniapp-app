@@ -4,15 +4,17 @@
       <image
         wx:if="{{userInfo.avatarUrl}}"
         class="user-avatar"
-        src="{{userInfo.avatarUrl}}"
-        mode="aspectFill">
-      </image>
+        src="{{userInfo.avatarUrl || '/images/default/avatar.png'}}"
+        mode="aspectFill"
+        lazy-load
+        />
       <image
         wx:else
         class="user-avatar"
         src="/images/default/avatar.png"
-        mode="aspectFill">
-      </image>
+        mode="aspectFill"
+        lazy-load
+        />
     </view>
     <view class="user-name-wrap">
       <text class="user-name">{{userInfo.nickName || '点击登录'}}</text>
@@ -50,7 +52,7 @@
         bindtap="goToTeamDetail"
         data-id="{{item.id}}"
         data-name="{{item.name}}">
-        <image class="team-logo" src="{{item.logo}}" mode="aspectFit"></image>
+        <image class="team-logo" src="{{item.logo || '/images/default/team.png'}}" mode="aspectFit" lazy-load></image>
         <view class="team-info">
           <text class="team-name">{{item.name}}</text>
           <text class="team-rank" wx:if="{{item.rank}}">{{item.rank}}</text>

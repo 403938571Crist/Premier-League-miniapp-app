@@ -40,7 +40,7 @@
           bindtap="onTeamTap"
           data-id="{{item.id}}"
           data-name="{{item.name}}">
-          <image class="item-crest" src="{{item.crest}}" mode="aspectFit"></image>
+          <image class="item-crest" src="{{item.crest || '/images/default/team.png'}}" mode="aspectFit" lazy-load></image>
           <view class="item-info">
             <text class="item-name">{{item.name}}</text>
             <text class="item-sub">{{item.shortName}}</text>
@@ -62,7 +62,7 @@
           bindtap="onPlayerTap"
           data-id="{{item.id}}"
           data-name="{{item.name}}">
-          <image class="item-photo" src="{{item.photo}}" mode="aspectFill"></image>
+          <image class="item-photo" src="{{item.photo || '/images/default/player.png'}}" mode="aspectFill" lazy-load></image>
           <view class="item-info">
             <text class="item-name">{{item.name}}</text>
             <text class="item-sub">{{item.positionLabel || item.chinesePosition || item.position}}{{item.nationalityLabel || item.chineseNationality || item.nationality ? ' / ' + (item.nationalityLabel || item.chineseNationality || item.nationality) : ''}}</text>

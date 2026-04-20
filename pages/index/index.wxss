@@ -149,11 +149,24 @@
 }
 
 .news-card {
+  position: relative;
   background-color: rgba(255, 255, 255, 0.98);
   border-radius: 20rpx;
   padding: 0;
   overflow: hidden;
   box-shadow: 0 14rpx 34rpx rgba(17, 17, 19, 0.07);
+}
+
+.news-card-no-cover {
+  border-top: 8rpx solid rgba(56, 0, 60, 0.08);
+}
+
+.news-cover-preload {
+  position: absolute;
+  width: 2rpx;
+  height: 2rpx;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .news-cover {
@@ -269,6 +282,10 @@
 
 .news-card-body {
   padding: 18rpx 18rpx 26rpx;
+}
+
+.news-card-body-no-cover {
+  padding-top: 22rpx;
 }
 
 .news-cover-live .news-cover-placeholder {

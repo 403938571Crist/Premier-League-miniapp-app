@@ -1,4 +1,4 @@
-﻿const { API_BASE_URL, REQUEST_TIMEOUT, REQUEST_RETRY_COUNT, REQUEST_RETRY_DELAY, AUTH_TOKEN_STORAGE_KEYS } = require('./env-config');
+const { API_BASE_URL, REQUEST_TIMEOUT, REQUEST_RETRY_COUNT, REQUEST_RETRY_DELAY, AUTH_TOKEN_STORAGE_KEYS } = require('./env-config');
 const { ERROR_CODES, ERROR_MESSAGES } = require('./constants');
 
 let lastToastAt = 0;
@@ -78,9 +78,20 @@ function buildHeaders(customHeader = {}) {
   return header;
 }
 
+function clearAuthTokenIfNeeded() {
+  const app = getAppSafe();
+  if (app?.clearAuthToken) {
+    app.clearAuthToken();
+  }
+}
+
 function resolveErrorCode(statusCode, errMsg) {
   if (statusCode === 401) {
-    return ERROR_CODES.DATA_NOT_FOUND;
+    return ERROR_CODES.AUTH_REQUIRED;
+  }
+
+  if (statusCode === 403) {
+    return ERROR_CODES.AUTH_REQUIRED;
   }
 
   if (statusCode === 408 || /timeout/i.test(errMsg || '')) {
@@ -140,37 +151,72 @@ function shouldRetryRequest({ method, statusCode, errMsg, attempt, retry }) {
   return /timeout|fail|refused|reset/i.test(errMsg || '');
 }
 
-function unwrapResponse(res, fallbackMessage) {
-  const payload = res?.data;
+function resolveBusinessError(payload, fallbackMessage) {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    return null;
+  }
 
-  if (res.statusCode < 200 || res.statusCode >= 300) {
-    const code = resolveErrorCode(res.statusCode);
-    const message = payload?.message
-      || payload?.msg
-      || ERROR_MESSAGES[code]
-      || fallbackMessage
-      || `HTTP ${res.statusCode}`;
-
-    throw createRequestError({
-      message,
-      code,
-      statusCode: res.statusCode,
+  if (Object.prototype.hasOwnProperty.call(payload, 'success') && payload.success === false) {
+    return createRequestError({
+      message: payload.message || payload.msg || ERROR_MESSAGES[ERROR_CODES.SERVER_ERROR] || fallbackMessage || 'Request failed',
+      code: ERROR_CODES.SERVER_ERROR,
+      statusCode: 200,
       raw: payload
     });
   }
 
-  if (payload && typeof payload === 'object' && !Array.isArray(payload) && Object.prototype.hasOwnProperty.call(payload, 'code')) {
-    if (payload.code !== 0) {
-      const code = payload.code === 401 ? ERROR_CODES.DATA_NOT_FOUND : ERROR_CODES.SERVER_ERROR;
-      throw createRequestError({
+  if (Object.prototype.hasOwnProperty.call(payload, 'code')) {
+    const rawCode = payload.code;
+    const numericCode = Number(rawCode);
+    const isSuccessCode = rawCode === 0 || rawCode === '0' || rawCode === true || rawCode === 'true'
+      || (Number.isFinite(numericCode) && numericCode >= 200 && numericCode < 300);
+    const code = (rawCode === 401 || rawCode === '401' || rawCode === 403 || rawCode === '403')
+      ? ERROR_CODES.AUTH_REQUIRED
+      : ERROR_CODES.SERVER_ERROR;
+
+    if (!isSuccessCode) {
+      return createRequestError({
         message: payload.message || payload.msg || ERROR_MESSAGES[code] || fallbackMessage || 'Request failed',
         code,
-        statusCode: res.statusCode,
+        statusCode: 200,
         raw: payload
       });
     }
+  }
 
-    return Object.prototype.hasOwnProperty.call(payload, 'data') ? payload.data : payload;
+  return null;
+}
+
+function resolveHttpErrorResponse(res, fallbackMessage) {
+  return createRequestError({
+    message: (res?.data && (res.data.message || res.data.msg)) ||
+      ERROR_MESSAGES[resolveErrorCode(res.statusCode, res.errMsg)] ||
+      fallbackMessage ||
+      `HTTP ${res.statusCode}`,
+    code: resolveErrorCode(res.statusCode, res.errMsg),
+    statusCode: res.statusCode,
+    raw: res.data
+  });
+}
+
+function unwrapResponse(res, fallbackMessage) {
+  const payload = res?.data;
+
+  if (res.statusCode < 200 || res.statusCode >= 300) {
+    throw resolveHttpErrorResponse(res, fallbackMessage);
+  }
+
+  const businessError = resolveBusinessError(payload, fallbackMessage);
+  if (businessError) {
+    if (businessError.code === ERROR_CODES.AUTH_REQUIRED) {
+      clearAuthTokenIfNeeded();
+    }
+
+    throw businessError;
+  }
+
+  if (payload && typeof payload === 'object' && !Array.isArray(payload) && Object.prototype.hasOwnProperty.call(payload, 'data')) {
+    return payload.data;
   }
 
   return payload;
@@ -239,6 +285,10 @@ function request(options = {}) {
           })) {
             setTimeout(() => doRequest(attempt + 1), retryDelay);
             return;
+          }
+
+          if (error.code === ERROR_CODES.AUTH_REQUIRED) {
+            clearAuthTokenIfNeeded();
           }
 
           if (showError) {

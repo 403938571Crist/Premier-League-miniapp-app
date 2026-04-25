@@ -1,6 +1,7 @@
 const { getFixtures } = require('../../utils/api');
 const { formatDate } = require('../../utils/util');
 const { getNewsList } = require('../../utils/news-api');
+const logger = require('../../utils/logger');
 
 const SHOW_REFRESH_INTERVAL = 2 * 60 * 1000;
 const NEWS_PAGE_SIZE = 10;
@@ -117,7 +118,7 @@ Page({
 
     if (!fixturesData && !newsData) {
       const error = fixturesResult.reason || newsResult.reason || new Error('Load failed');
-      console.error('Failed to load home page data:', error);
+      logger.error('Failed to load home page data:', error);
       this.setData({
         loading: false,
         error: {
@@ -129,11 +130,11 @@ Page({
     }
 
     if (fixturesResult.status === 'rejected') {
-      console.error('Failed to load fixtures:', fixturesResult.reason);
+      logger.error('Failed to load fixtures:', fixturesResult.reason);
     }
 
     if (newsResult.status === 'rejected') {
-      console.error('Failed to load news:', newsResult.reason);
+      logger.error('Failed to load news:', newsResult.reason);
     }
 
     const newsList = this.prepareNewsItems(newsData?.list || []);
@@ -186,7 +187,7 @@ Page({
         newsLoadingMore: false
       });
     } catch (error) {
-      console.error('Load more news failed:', error);
+      logger.error('Load more news failed:', error);
       this.setData({ newsLoadingMore: false });
     }
   },
@@ -343,7 +344,7 @@ Page({
   },
 
   onMatchTap(e) {
-    console.log('Match tapped:', e.detail.match);
+    logger.log('Match tapped:', e.detail.match);
   },
 
   onFeaturedChange(e) {
@@ -423,5 +424,18 @@ Page({
     wx.navigateTo({
       url: '/pages/teams/teams'
     });
+  },
+
+  onShareAppMessage() {
+    return {
+      title: '英超资讯 · 赛程、积分、射手',
+      path: '/pages/index/index'
+    };
+  },
+
+  onShareTimeline() {
+    return {
+      title: '英超资讯 · 赛程、积分、射手'
+    };
   }
 });

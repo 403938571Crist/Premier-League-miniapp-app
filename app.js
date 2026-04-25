@@ -1,4 +1,5 @@
 ﻿const { API_BASE_URL } = require('./utils/env-config');
+const logger = require('./utils/logger');
 
 App({
   globalData: {
@@ -21,22 +22,22 @@ App({
   },
 
   onLaunch() {
-    console.log('App Launch');
+    logger.log('App Launch');
     this.getAuthToken();
     this.loadFollowedTeams();
     this.checkUpdate();
   },
 
   onShow() {
-    console.log('App Show');
+    logger.log('App Show');
   },
 
   onHide() {
-    console.log('App Hide');
+    logger.log('App Hide');
   },
 
   onError(msg) {
-    console.error('App Error:', msg);
+    logger.error('App Error:', msg);
   },
 
   getAuthToken() {
@@ -53,7 +54,7 @@ App({
           return this.globalData.authToken;
         }
       } catch (error) {
-        console.error('读取 token 失败:', error);
+        logger.error('读取 token 失败:', error);
       }
     }
 
@@ -71,7 +72,7 @@ App({
     try {
       wx.setStorageSync('authToken', nextToken);
     } catch (error) {
-      console.error('保存 token 失败:', error);
+      logger.error('保存 token 失败:', error);
     }
   },
 
@@ -81,7 +82,7 @@ App({
       try {
         wx.removeStorageSync(key);
       } catch (error) {
-        console.error('清理 token 失败:', error);
+        logger.error('清理 token 失败:', error);
       }
     });
   },
@@ -107,7 +108,7 @@ App({
           entries = stored.filter((item) => item && item.key && item.value);
         }
       } catch (error) {
-        console.error('读取 LRU 缓存失败:', error);
+        logger.error('读取 LRU 缓存失败:', error);
       }
 
       this.globalData.lruCaches[name] = entries;
@@ -124,7 +125,7 @@ App({
     try {
       wx.setStorageSync(this.getLruStorageKey(name), this.globalData.lruCaches[name] || []);
     } catch (error) {
-      console.error('写入 LRU 缓存失败:', error);
+      logger.error('写入 LRU 缓存失败:', error);
     }
   },
 
@@ -183,7 +184,7 @@ App({
         this.globalData.followedTeams = JSON.parse(followed);
       }
     } catch (e) {
-      console.error('加载关注球队失败:', e);
+      logger.error('加载关注球队失败:', e);
     }
   },
 
@@ -191,7 +192,7 @@ App({
     try {
       wx.setStorageSync('followedTeams', JSON.stringify(this.globalData.followedTeams));
     } catch (e) {
-      console.error('保存关注球队失败:', e);
+      logger.error('保存关注球队失败:', e);
     }
   },
 
@@ -234,7 +235,7 @@ App({
           this.globalData.cache[cacheTimeKey] = time;
         }
       } catch (e) {
-        console.error('读取缓存失败:', e);
+        logger.error('读取缓存失败:', e);
       }
     }
 
@@ -249,7 +250,7 @@ App({
       try {
         wx.removeStorageSync(this.getCacheStorageKey(key));
       } catch (e) {
-        console.error('删除过期缓存失败:', e);
+        logger.error('删除过期缓存失败:', e);
       }
       return null;
     }
@@ -269,7 +270,7 @@ App({
     try {
       wx.setStorageSync(this.getCacheStorageKey(key), { data, time });
     } catch (e) {
-      console.error('写入缓存失败:', e);
+      logger.error('写入缓存失败:', e);
     }
   },
 
@@ -324,7 +325,7 @@ App({
       const updateManager = wx.getUpdateManager();
 
       updateManager.onCheckForUpdate((res) => {
-        console.log('检查更新:', res.hasUpdate);
+        logger.log('检查更新:', res.hasUpdate);
       });
 
       updateManager.onUpdateReady(() => {
@@ -340,7 +341,7 @@ App({
       });
 
       updateManager.onUpdateFailed(() => {
-        console.error('热更新下载失败，请重试');
+        logger.error('热更新下载失败，请重试');
       });
     }
   }

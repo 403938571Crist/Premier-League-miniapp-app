@@ -1,4 +1,5 @@
 ﻿const { getNewsDetail } = require('../../utils/news-api');
+const logger = require('../../utils/logger');
 
 const SOURCE_LABEL_MAP = {
   official: '官方资讯',
@@ -341,7 +342,7 @@ Page({
         errorMessage: ''
       });
     } catch (error) {
-      console.error('Failed to load news detail:', error);
+      logger.error('Failed to load news detail:', error);
       this.setData({
         loading: false,
         article: null,

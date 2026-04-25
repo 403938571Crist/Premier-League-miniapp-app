@@ -1,4 +1,5 @@
 ﻿const { showConfirm, showSuccess } = require('../../utils/util');
+const logger = require('../../utils/logger');
 
 Page({
   data: {
@@ -30,7 +31,7 @@ Page({
         this.setData({ userInfo: stored });
       }
     } catch (e) {
-      console.error('读取用户信息失败:', e);
+      logger.error('读取用户信息失败:', e);
     }
   },
 
@@ -41,7 +42,7 @@ Page({
     try {
       wx.setStorageSync('userInfo', userInfo);
     } catch (e) {
-      console.error('保存用户头像失败:', e);
+      logger.error('保存用户头像失败:', e);
     }
   },
 
@@ -89,12 +90,12 @@ Page({
 
       this.setData({ cacheSize: sizeText });
     } catch (e) {
-      console.error('计算缓存大小失败:', e);
+      logger.error('计算缓存大小失败:', e);
     }
   },
 
   goToFollowedTeams() {
-    console.log('查看所有关注球队');
+    logger.log('查看所有关注球队');
   },
 
   goToTeamDetail(e) {

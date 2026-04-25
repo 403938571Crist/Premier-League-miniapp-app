@@ -1,3 +1,5 @@
+const logger = require('../../utils/logger');
+
 Component({
   properties: {
     teamId: {
@@ -68,7 +70,7 @@ Component({
           });
         }
       } catch (error) {
-        console.error('Follow action error:', error);
+        logger.error('Follow action error:', error);
       } finally {
         this.setData({ loading: false });
       }

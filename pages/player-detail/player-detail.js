@@ -1,5 +1,6 @@
 const { getPlayerDetail, getPlayerMatches, getTeamDetail } = require('../../utils/api');
 const { calculateAge, getTeamName } = require('../../utils/util');
+const logger = require('../../utils/logger');
 
 Page({
   data: {
@@ -40,7 +41,7 @@ Page({
             name: getTeamName(teamData.name)
           };
         } catch (teamError) {
-          console.error('Failed to load player team:', teamError);
+          logger.error('Failed to load player team:', teamError);
         }
       }
 
@@ -71,7 +72,7 @@ Page({
         }
       });
     } catch (error) {
-      console.error('Failed to load player detail:', error);
+      logger.error('Failed to load player detail:', error);
       this.setData({
         loading: false,
         error: {
@@ -89,5 +90,24 @@ Page({
         url: `/pages/team-detail/team-detail?id=${team.id}&name=${encodeURIComponent(team.name)}`
       });
     }
+  },
+
+  onShareAppMessage() {
+    const player = this.data.player || {};
+    const name = player.name || '英超球员';
+    const id = this.data.playerId || player.id || '';
+    return {
+      title: `${name} · 英超球员资料`,
+      path: id ? `/pages/player-detail/player-detail?id=${id}&name=${encodeURIComponent(name)}` : '/pages/index/index'
+    };
+  },
+
+  onShareTimeline() {
+    const player = this.data.player || {};
+    const name = player.name || '英超球员';
+    return {
+      title: `${name} · 英超球员资料`,
+      query: this.data.playerId ? `id=${this.data.playerId}&name=${encodeURIComponent(name)}` : ''
+    };
   }
 });

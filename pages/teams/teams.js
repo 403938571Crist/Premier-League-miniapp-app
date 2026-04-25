@@ -1,4 +1,5 @@
 const { getTeams, getStandings } = require('../../utils/api');
+const logger = require('../../utils/logger');
 
 Page({
   data: {
@@ -61,7 +62,7 @@ Page({
 
       this.setData({ loading: false, teams });
     } catch (error) {
-      console.error('加载球队列表失败:', error);
+      logger.error('加载球队列表失败:', error);
       this.setData({
         loading: false,
         error: {

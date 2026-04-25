@@ -1,4 +1,5 @@
 const { search } = require('../../utils/api');
+const logger = require('../../utils/logger');
 
 const DEBOUNCE_DELAY = 400;
 
@@ -51,7 +52,7 @@ Page({
         players: result.players || []
       });
     } catch (error) {
-      console.error('搜索失败:', error);
+      logger.error('搜索失败:', error);
       this.setData({
         searching: false,
         hasSearched: true,

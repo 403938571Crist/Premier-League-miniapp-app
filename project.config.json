@@ -1,7 +1,14 @@
 {
   "description": "英超资讯微信小程序",
   "packOptions": {
-    "ignore": [],
+    "ignore": [
+      { "type": "file", "value": "dump.rdb" },
+      { "type": "folder", "value": "news-detail-redesign" },
+      { "type": "folder", "value": "tools" },
+      { "type": "folder", "value": ".claude" },
+      { "type": "regexp", "value": "\\.md$" },
+      { "type": "regexp", "value": "\\.log$" }
+    ],
     "include": []
   },
   "setting": {

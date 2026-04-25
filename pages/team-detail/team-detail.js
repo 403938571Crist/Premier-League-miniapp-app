@@ -5,6 +5,7 @@ const {
   getTeamStats
 } = require('../../utils/api');
 const { getTeamName } = require('../../utils/util');
+const logger = require('../../utils/logger');
 
 Page({
   data: {
@@ -83,7 +84,7 @@ Page({
         recentMatches
       });
     } catch (error) {
-      console.error('Failed to load team detail:', error);
+      logger.error('Failed to load team detail:', error);
       this.setData({
         loading: false,
         error: {
@@ -141,6 +142,25 @@ Page({
   },
 
   onFollowChange(e) {
-    console.log('Follow state changed:', e.detail);
+    logger.log('Follow state changed:', e.detail);
+  },
+
+  onShareAppMessage() {
+    const team = this.data.team || {};
+    const name = getTeamName(team.name) || team.shortName || '英超球队';
+    const id = this.data.teamId || team.id || '';
+    return {
+      title: `${name} · 英超球队主页`,
+      path: id ? `/pages/team-detail/team-detail?id=${id}&name=${encodeURIComponent(name)}` : '/pages/index/index'
+    };
+  },
+
+  onShareTimeline() {
+    const team = this.data.team || {};
+    const name = getTeamName(team.name) || team.shortName || '英超球队';
+    return {
+      title: `${name} · 英超球队主页`,
+      query: this.data.teamId ? `id=${this.data.teamId}&name=${encodeURIComponent(name)}` : ''
+    };
   }
 });

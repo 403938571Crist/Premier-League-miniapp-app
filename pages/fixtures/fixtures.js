@@ -1,5 +1,6 @@
 ﻿const { getFixtures } = require('../../utils/api');
 const { formatDate } = require('../../utils/util');
+const logger = require('../../utils/logger');
 
 const SHOW_REFRESH_INTERVAL = 2 * 60 * 1000;
 const SWIPER_CENTER_INDEX = 1;
@@ -218,7 +219,7 @@ Page({
 
       this.applyCurrentPane(paneItems[SWIPER_CENTER_INDEX]);
     } catch (error) {
-      console.error('Failed to load fixtures:', error);
+      logger.error('Failed to load fixtures:', error);
       this.setData({
         loading: false,
         error: {
@@ -354,6 +355,6 @@ Page({
   },
 
   onMatchTap(e) {
-    console.log('Match tapped:', e.detail.match);
+    logger.log('Match tapped:', e.detail.match);
   }
 });

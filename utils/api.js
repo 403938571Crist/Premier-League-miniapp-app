@@ -208,6 +208,35 @@ function normalizePlayer(player = {}) {
   };
 }
 
+function getPlayerDedupKey(player = {}) {
+  const apiId = player.apiId || player.id || player.playerId || '';
+  const name = player.chineseName || player.name || [player.firstName, player.lastName].filter(Boolean).join(' ');
+  const shirtNumber = player.shirtNumber || '';
+  const birth = player.dateOfBirth || '';
+
+  return String(apiId || `${name}|${shirtNumber}|${birth}`).trim();
+}
+
+function dedupePlayers(players = [], seenKeys = new Set()) {
+  return (Array.isArray(players) ? players : []).reduce((list, player) => {
+    const normalized = normalizePlayer(player);
+    const dedupKey = getPlayerDedupKey(player) || getPlayerDedupKey(normalized);
+
+    if (!dedupKey) {
+      list.push(normalized);
+      return list;
+    }
+
+    if (seenKeys.has(dedupKey)) {
+      return list;
+    }
+
+    seenKeys.add(dedupKey);
+    list.push(normalized);
+    return list;
+  }, []);
+}
+
 function normalizePlayerStat(stat = {}) {
   const playerName = stat.chineseName || stat.playerName || '';
   const teamName = stat.teamChineseName || stat.teamShortName || stat.teamName || '';
@@ -370,12 +399,13 @@ async function getTeamSquad(teamId, useCache = true) {
   }
 
   const data = await requestApi(`/teams/${teamId}/squad`);
+  const seenKeys = new Set();
   const result = {
-    goalkeepers: (data.goalkeepers || []).map(normalizePlayer),
-    defenders: (data.defenders || []).map(normalizePlayer),
-    midfielders: (data.midfielders || []).map(normalizePlayer),
-    forwards: (data.attackers || data.forwards || []).map(normalizePlayer),
-    all: (data.all || []).map(normalizePlayer),
+    goalkeepers: dedupePlayers(data.goalkeepers || [], seenKeys),
+    defenders: dedupePlayers(data.defenders || [], seenKeys),
+    midfielders: dedupePlayers(data.midfielders || [], seenKeys),
+    forwards: dedupePlayers(data.attackers || data.forwards || [], seenKeys),
+    all: dedupePlayers(data.all || []),
     totalCount: data.totalCount || data.total || 0
   };
 

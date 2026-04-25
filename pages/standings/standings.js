@@ -1,4 +1,5 @@
 ﻿const { getStandings, getTopScorers, getTopAssists } = require('../../utils/api');
+const logger = require('../../utils/logger');
 
 const SHOW_REFRESH_INTERVAL = 5 * 60 * 1000;
 const PLAYER_STAT_LIMIT = 20;
@@ -148,7 +149,7 @@ Page({
 
     if (!standingsData && !scorersData && !assistsData) {
       const error = standingsResult.reason || scorersResult.reason || assistsResult.reason || new Error('Load failed');
-      console.error('Failed to load rankings:', error);
+      logger.error('Failed to load rankings:', error);
       this.setData({
         loading: false,
         error: {
@@ -160,13 +161,13 @@ Page({
     }
 
     if (standingsResult.status === 'rejected') {
-      console.error('Failed to load standings:', standingsResult.reason);
+      logger.error('Failed to load standings:', standingsResult.reason);
     }
     if (scorersResult.status === 'rejected') {
-      console.error('Failed to load top scorers:', scorersResult.reason);
+      logger.error('Failed to load top scorers:', scorersResult.reason);
     }
     if (assistsResult.status === 'rejected') {
-      console.error('Failed to load top assists:', assistsResult.reason);
+      logger.error('Failed to load top assists:', assistsResult.reason);
     }
 
     const cacheInfoByTab = {
@@ -235,5 +236,20 @@ Page({
     wx.navigateTo({
       url: `/pages/team-detail/team-detail?id=${team.team.id}&name=${encodeURIComponent(team.team.name)}`
     });
+  },
+
+  onShareAppMessage() {
+    const meta = this.data.activeTabMeta || {};
+    return {
+      title: meta.title || '英超积分榜',
+      path: '/pages/standings/standings'
+    };
+  },
+
+  onShareTimeline() {
+    const meta = this.data.activeTabMeta || {};
+    return {
+      title: meta.title || '英超积分榜'
+    };
   }
 });

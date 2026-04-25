@@ -1,6 +1,7 @@
 {
   "usingComponents": {
     "empty-state": "../../components/empty-state/empty-state",
+    "error-state": "../../components/error-state/error-state",
     "pl-icon": "../../components/icon/index"
   },
   "backgroundColor": "#F5F5F5",
